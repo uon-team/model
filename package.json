@@ -1,5 +1,5 @@
 {
-  "name": "@uon/db",
+  "name": "@uon/model",
   "version": "0.1.0",
   "description": "A library for building database models",
   "main": "./dist/index.js",
@@ -8,16 +8,14 @@
     "prepublishOnly": "tsc -p ./ --outDir dist/"
   },
   "dependencies": {
-    "mongodb": "^3.0.1",
     "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
-    "@types/mongodb": "^3.0.1",
     "@types/reflect-metadata": "0.0.5"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/uon-team/db.git"
+    "url": "https://github.com/uon-team/model.git"
   },
   "license": "MIT",
   "author": {

@@ -37,3 +37,10 @@ export interface Index {
     languageFieldName?: string;
 
 }
+
+
+export function CompareIndex(a: Index, b: Index): boolean {
+
+
+    return false;
+}

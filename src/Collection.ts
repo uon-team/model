@@ -16,6 +16,9 @@ export interface Collection {
     // name of the collection, if not provided, with use lowercase class name with + 's'
     name?: string;
 
+    // the name of the primary (unique) key field for update operations, defaults to "_id"
+    primaryKey?: string;
+
     // the list of indices to create on the collection
     indices?: Index[];
 
@@ -38,6 +41,7 @@ export function Collection(meta: Collection = {}) {
 
         // set collection name if not set
         meta.name = meta.name || target.name.toLowerCase() + 's';
+        meta.primaryKey = meta.primaryKey || "_id";
 
         // create a new instance of the field metadata
         let col_instance = new (Collection as any)(meta);

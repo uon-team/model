@@ -62,6 +62,18 @@ export class Client {
         });
     }
 
+    /**
+     * Make sure indices are created and or removed to match the collection's index definition
+     * @param type 
+     */
+    syncIndices<T>(type: Type<T>): Promise<void> {
+
+        let meta = GetCollectionMetadata(type);
+
+        
+        return Promise.resolve();
+    }
+
 
     /**
      * Find multiple entries
@@ -210,7 +222,7 @@ export class Client {
     }
 
 	/**
-	 * Update an instance of a persitent model
+	 * Update an instance of a persistent model
 	 * @param model
 	 */
     update<T extends PersistentModel>(model: T, extraOps?: any) {
@@ -228,10 +240,15 @@ export class Client {
 
         // prepare the update operation
         let op: any = PrepareUpdateOp(model, meta);
-        console.log(op);
+
+        // prepare the query based on the primary field
+        let query: any = {};
+        query[meta.collection.primaryKey] = (model as any)[meta.collection.primaryKey];
+
+
 
         // do it
-        return collection.updateOne({ _id: model._id || new ObjectId() }, op, { upsert: true })
+        return collection.updateOne(query, op, { upsert: true })
             .then((result) => {
 
                 // grab the upserted id just in case we havent provided one
@@ -242,6 +259,13 @@ export class Client {
 
                 return model;
             });
+    }
+
+    insertMany<T extends PersistentModel>(type: Type<T>, values: T[]) : Promise<any> {
+
+
+
+        return null;
     }
 
     /**

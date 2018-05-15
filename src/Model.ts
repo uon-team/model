@@ -228,6 +228,8 @@ function ExecuteValidators(model: any, key: string, newValue: any, validators: F
 
 function GetModelSerializeFunction<T>(type: Type<T>, fields: any): any {
 
+
+
     return function (val: any): any {
 
         let result: any = {};
@@ -238,6 +240,8 @@ function GetModelSerializeFunction<T>(type: Type<T>, fields: any): any {
             let field: Field = ExtractFieldMetaFromArray(fields[name]);
 
             if (field.isDBRef) {
+
+                // TODO change this to be primary field, or use Mongo's DbRef?
                 v = v['_id'];
             }
 
@@ -266,6 +270,7 @@ function GetModelDeserializeFunction<T>(type: Type<any>, fields: any): any {
             let field: Field = ExtractFieldMetaFromArray(fields[name]);
      
             if (field.isDBRef) {
+                // TODO change this to be primary field, or use Mongo's DbRef?
                 v = { _id : v };
             }
 
