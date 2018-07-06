@@ -8,11 +8,9 @@
     "prepublishOnly": "tsc -p ./ --outDir dist/"
   },
   "dependencies": {
-    "reflect-metadata": "^0.1.10"
+    "@uon/core": "^0.1.0"
   },
-  "devDependencies": {
-    "@types/reflect-metadata": "0.0.5"
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/uon-team/model.git"

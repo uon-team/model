@@ -1,9 +1,12 @@
 # UON Model
 
-A database agnostic, decorator-based schema/model library with assignment-time validation.
+A database agnostic, decorator-based schema/model library.
 
 ## Usage
 
+```shell
+    npm i @uon/model
+```
 
 ## Limitations
 

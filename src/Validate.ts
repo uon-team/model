@@ -1,7 +1,5 @@
 
-
-import { Type } from './Type';
-import { GetOrDefineMetadata, CreateMetadataCtor, META_FIELDS } from './Metadata'
+import { Type, GetOrDefineMetadata, CreateMetadataCtor, META_PROPERTIES } from '@uon/core';
 
 
 export interface Validate {
@@ -24,7 +22,7 @@ export function Validate(validators?: Function[]) {
     return function ValidateDecorator(target: any, key: string) {
 
         // get the fields meta object
-        let annotations: any = GetOrDefineMetadata(META_FIELDS, target, {});
+        let annotations: any = GetOrDefineMetadata(META_PROPERTIES, target, {});
 
         // create a new instance of the field metadata
         let validate_instance = new (Validate as any)(validators);

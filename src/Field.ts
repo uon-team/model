@@ -1,16 +1,12 @@
 
 
-import { Type } from './Type';
-import { GetOrDefineMetadata, CreateMetadataCtor, HasMetadataInstance, META_FIELDS, META_MODEL } from './Metadata'
-import { Collection } from './Collection';
-
+import { Type, GetMetadata, GetOrDefineMetadata, CreateMetadataCtor, FindMetadataOfType, META_PROPERTIES, META_ANNOTATIONS } from '@uon/core'
 
 export interface Field {
 
     key: string;
     type?: Type<any>;
     arrayType?: Type<any>;
-    isDBRef?: boolean;
 
 }
 
@@ -27,29 +23,63 @@ export function Field(arrayType?: Type<any>) {
     return function FieldDecorator(target: any, key: string) {
 
         // get the field type 
-        let type: Type<any> = Reflect.getMetadata('design:type', target, key);
+        let type: Type<any> = GetMetadata('design:type', target, key);
 
         // Ensure that an array type has been provided for arrays
         // since the Reflect library doesnt support it yet
-        if(type == Array && !arrayType) {
+        if (type == Array && !arrayType) {
             throw new Error("You must provide the type of array elements as the decorator argument.");
         }
 
         // get the fields meta object
-        let annotations: any = GetOrDefineMetadata(META_FIELDS, target, {});
+        let annotations: any = GetOrDefineMetadata(META_PROPERTIES, target, {});
 
         // create a new instance of the field metadata
         let field_instance = new (Field as any)(arrayType);
         field_instance.key = key;
         field_instance.type = type;
 
-        // should we just keep the collection object?
-        field_instance.isDBRef = HasMetadataInstance(META_MODEL, arrayType || type, Collection);
-
-        
         // add field meta to field annotations
         annotations[key] = annotations[key] || [];
         annotations[key].push(field_instance);
+
+
+
+    }
+}
+
+
+export interface ID {
+    key: string;
+    type: Type<any>;
+}
+
+
+
+export function ID() {
+
+    const meta_ctor = CreateMetadataCtor((key: string, type: Type<any>) => ({ key, type }));
+    if (this instanceof ID) {
+        meta_ctor.apply(this, arguments);
+        return this;
+    }
+
+
+    return function IDDecorator(target: any, key: string) {
+
+        // get the field type 
+        let type: Type<any> = GetMetadata('design:type', target, key);
+
+
+        // get the fields meta object
+        let annotations: any = GetOrDefineMetadata(META_PROPERTIES, target, {});
+
+        // create a new instance of the id metadata
+        let id_instance = new (ID as any)(key, type);
+
+        // add field meta to field annotations
+        annotations[key] = annotations[key] || [];
+        annotations[key].push(id_instance);
 
 
 

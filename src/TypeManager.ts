@@ -1,15 +1,14 @@
 
 
 
-import { Type } from './Type';
-import { ObjectId } from 'bson';
-
+import { Type } from '@uon/core';
 
 
 export interface TypeDefinition<T> {
 
     serialize?: (v: T) => any;
     deserialize?: (v: any) => T;
+    validate?: (v: any) => boolean;
     keys?: string[];
 
 }
@@ -64,7 +63,7 @@ export class TypeManager {
             return def.serialize(obj);
         }
         else if (def.keys) {
-            
+
             let result: any = {};
 
             for (let i = 0; i < def.keys.length; ++i) {
@@ -123,19 +122,22 @@ export class TypeManager {
         }
 
     }
+
+    static Validate<T>(type: Type<T>, obj: any): boolean {
+
+        const def = this.TYPES.get(type);
+
+        if (def.validate) {
+
+
+
+        }
+
+
+        return true;
+    }
 }
 
-// Register ObjectId
-TypeManager.Register(ObjectId, {
-
-    serialize(value: ObjectId) {
-        return value;
-    },
-
-    deserialize(value: any): ObjectId {
-        return new ObjectId(value)
-    }
-});
 
 TypeManager.Register(Number, {
 
@@ -155,6 +157,17 @@ TypeManager.Register(String, {
     },
 
     deserialize(value: any): string {
-        return value
+        return value;
+    }
+});
+
+TypeManager.Register(Date, {
+
+    serialize(value: Date) {
+        return value;
+    },
+
+    deserialize(value: any): Date {
+        return new Date(value);
     }
 });
