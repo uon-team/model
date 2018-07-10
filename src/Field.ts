@@ -1,7 +1,19 @@
 
 
-import { Type, GetMetadata, GetOrDefineMetadata, CreateMetadataCtor, FindMetadataOfType, META_PROPERTIES, META_ANNOTATIONS } from '@uon/core'
+import {
+    Type,
+    GetMetadata,
+    GetOrDefineMetadata,
+    CreateMetadataCtor,
+    FindMetadataOfType,
+    META_PROPERTIES,
+    META_ANNOTATIONS
+} from '@uon/core'
 
+
+/**
+ * The metadata for a model's serializable field
+ */
 export interface Field {
 
     key: string;
@@ -49,6 +61,9 @@ export function Field(arrayType?: Type<any>) {
 }
 
 
+/**
+ * Represents the primary key of a model
+ */
 export interface ID {
     key: string;
     type: Type<any>;

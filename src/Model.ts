@@ -254,6 +254,13 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
 }
 
 
+/**
+ * 
+ * @param model 
+ * @param key 
+ * @param newValue 
+ * @param validators 
+ */
 function ExecuteValidators(model: any, key: string, newValue: any, validators: Function[]): Error[] {
 
     let errors: Error[] = [];
@@ -274,7 +281,11 @@ function ExecuteValidators(model: any, key: string, newValue: any, validators: F
 
 }
 
-
+/**
+ * 
+ * @param type 
+ * @param annotations 
+ */
 function GetModelSerializeFunction<T>(type: Type<T>, annotations: any): any {
 
 
@@ -307,6 +318,11 @@ function GetModelSerializeFunction<T>(type: Type<T>, annotations: any): any {
     };
 }
 
+/**
+ * 
+ * @param type 
+ * @param annotations 
+ */
 function GetModelDeserializeFunction<T>(type: Type<T>, annotations: any): any {
 
     const fields: Field[] = [];
@@ -341,6 +357,11 @@ function GetModelDeserializeFunction<T>(type: Type<T>, annotations: any): any {
     };
 }
 
+/**
+ * 
+ * @param arr 
+ * @param type 
+ */
 function ExtractMetaFromArray(arr: any[], type: any) {
 
     for (let i = 0; i < arr.length; ++i) {
@@ -354,6 +375,11 @@ function ExtractMetaFromArray(arr: any[], type: any) {
 }
 
 
+/**
+ * 
+ * @param map 
+ * @param key 
+ */
 function GetOrDefineInWeakMap(map: WeakMap<object, any>, key: object) {
 
     let data = map.get(key);
