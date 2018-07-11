@@ -8,8 +8,8 @@ export class ValidationError extends Error {
         readonly target: any,
         readonly key: string,
         readonly value: any,
-        readonly messageFormat: string
+        readonly message: string
     ) {
-        super(`${validator.name} - ${messageFormat}`);
+        super(`${validator.name} - ${message}`);
     }
 }
