@@ -1,5 +1,5 @@
 
-import { Type, GetOrDefineMetadata, CreateMetadataCtor, META_PROPERTIES, META_ANNOTATIONS, GetMetadata } from '@uon/core'
+import { Type, GetOrDefineMetadata, META_PROPERTIES, META_ANNOTATIONS, GetMetadata, TypeDecorator, MakeTypeDecorator } from '@uon/core'
 import { Field, ID } from './Field';
 import { Validate } from './Validate';
 import { TypeManager } from './TypeManager';
@@ -11,6 +11,10 @@ const DIRTY_FIELDS_WEAPMAP = new WeakMap();
 // a weakmap to keep data
 const DATA_WEAKMAP: WeakMap<object, any> = new WeakMap<object, any>();
 
+export interface ModelDecorator {
+    (): TypeDecorator;
+    new(...args: any[]): Model
+}
 
 /**
  * Model interface
@@ -21,72 +25,59 @@ export interface Model {
     idField: ID;
 }
 
+export const Model: ModelDecorator =
+    MakeTypeDecorator("Model", (fields: any) => ({ fields }), null,
+        (target: Type<any>, meta: Model) => {
 
-/**
- * Model decorator
- * @param args 
- */
-export function Model(...args: any[]) {
+            // assign type to model
+            meta.type = target;
 
-    const meta_ctor = CreateMetadataCtor((fields: any) => ({ fields }));
-    if (this instanceof Model) {
-        meta_ctor.apply(this, arguments);
-        return this;
-    }
+            // get all defined field
+            let fields: any = GetOrDefineMetadata(META_PROPERTIES, target.prototype, {});
 
-    return function ModelDecorator(target: Type<any>) {
 
-        // get the fields meta object
-        let annotations: any[] = GetOrDefineMetadata(META_ANNOTATIONS, target, []);
+            let id_field: ID;
 
-        // get all defined field
-        let fields: any = GetOrDefineMetadata(META_PROPERTIES, target.prototype, {});
+            // replace member with getter setter
+            for (let name in fields) {
 
-        // create a new instance of the field metadata
-        let model_instance = new (Model as any)(fields);
-        model_instance.type = target;
+                let model_annotations = fields[name];
 
-        annotations.push(model_instance);
+                // try an find an ID field
+                const id = ExtractMetaFromArray(fields[name], ID);
+                if (id) {
 
-        let id_field: ID;
+                    // we can only have a single ID field
+                    if (id_field) {
+                        throw new Error(`Model: ${target.name} has more then 1 ID() decorator.`);
+                    }
 
-        // replace member with getter setter
-        for (let name in fields) {
-
-            let model_annotations = fields[name];
-
-            // try an find an ID field
-            const id = ExtractMetaFromArray(fields[name], ID);
-            if(id) {
-
-                // we can only have a single ID field
-                if(id_field) {
-                    throw new Error(`Model: ${target.name} has more then 1 ID() decorator.`);
+                    meta.idField = id;
+                    id_field = id;
                 }
 
-                model_instance.idField = id;
-                id_field = id;
+
+                // replace field with getter setter
+                ReplacePropertyWithGetterSetter(target.prototype, name, model_annotations);
+
             }
-            
 
-            // replace field with getter setter
-            ReplacePropertyWithGetterSetter(target.prototype, name, model_annotations);
+            // build a serialization function for this model
+            const serialize = GetModelSerializeFunction(target, fields);
 
-        }
+            // build a deserialization function for this model
+            const deserialize = GetModelDeserializeFunction(target, fields);
 
-        // build a serialization function for this model
-        const serialize = GetModelSerializeFunction(target, fields);
+            // Register type with type manager
+            TypeManager.Register(target, { serialize, deserialize });
 
-        // build a deserialization function for this model
-        const deserialize = GetModelDeserializeFunction(target, fields);
+            // return the original class target
+            return target;
 
-        // Register type with type manager
-        TypeManager.Register(target, { serialize, deserialize });
 
-        // return the original class target
-        return target;
-    }
-}
+        });
+
+
 
 /**
  * Get a list of Field metadata from the Model metadata
@@ -292,7 +283,7 @@ function GetModelSerializeFunction<T>(type: Type<T>, annotations: any): any {
     const fields: Field[] = [];
     for (let name in annotations) {
         fields.push(
-            ExtractMetaFromArray(annotations[name], Field) || 
+            ExtractMetaFromArray(annotations[name], Field) ||
             ExtractMetaFromArray(annotations[name], ID));
     }
 
@@ -307,10 +298,10 @@ function GetModelSerializeFunction<T>(type: Type<T>, annotations: any): any {
             let field: Field = fields[i];
             let v = val[field.key];
 
-            if(v) {
+            if (v) {
                 v = TypeManager.Serialize(field.arrayType || field.type, v);
             }
-            
+
             result[field.key] = v;
         }
 
@@ -328,7 +319,7 @@ function GetModelDeserializeFunction<T>(type: Type<T>, annotations: any): any {
     const fields: Field[] = [];
     for (let name in annotations) {
         fields.push(
-            ExtractMetaFromArray(annotations[name], Field) || 
+            ExtractMetaFromArray(annotations[name], Field) ||
             ExtractMetaFromArray(annotations[name], ID));
     }
 

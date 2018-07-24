@@ -171,3 +171,14 @@ TypeManager.Register(Date, {
         return new Date(value);
     }
 });
+
+TypeManager.Register(Object, {
+
+    serialize(value: Object) {
+        return value;
+    },
+
+    deserialize(value: any): Object {
+        return value;
+    }
+});
