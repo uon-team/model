@@ -35,6 +35,7 @@ export const Model: ModelDecorator =
             // get all defined field
             let fields: any = GetOrDefineMetadata(META_PROPERTIES, target.prototype, {});
 
+            meta.fields = fields;
 
             let id_field: ID;
 
