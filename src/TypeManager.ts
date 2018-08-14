@@ -150,6 +150,17 @@ TypeManager.Register(Number, {
     }
 });
 
+TypeManager.Register(Boolean, {
+
+    serialize(value: Boolean) {
+        return value;
+    },
+
+    deserialize(value: any): Boolean {
+        return value
+    }
+});
+
 TypeManager.Register(String, {
 
     serialize(value: string) {
