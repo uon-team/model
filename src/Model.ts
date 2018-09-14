@@ -16,14 +16,7 @@ export interface ModelDecorator {
     new(...args: any[]): Model
 }
 
-/**
- * Model interface
- */
-export interface Model {
-    type: Type<any>;
-    fields: { [k: string]: any[] }
-    idField: ID;
-}
+
 
 export const Model: ModelDecorator =
     MakeTypeDecorator("Model", (fields: any) => ({ fields }), null,
@@ -78,7 +71,14 @@ export const Model: ModelDecorator =
 
         });
 
-
+/**
+ * Model interface
+ */
+export interface Model {
+    type: Type<any>;
+    fields: { [k: string]: any[] }
+    idField: ID;
+}
 
 /**
  * Get a list of Field metadata from the Model metadata
