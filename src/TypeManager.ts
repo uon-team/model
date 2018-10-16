@@ -3,6 +3,25 @@
 
 import { Type } from '@uon/core';
 
+declare var global: any;
+
+let GLOBAL: any;
+
+try {
+    GLOBAL = global;
+}
+catch(ex) {
+    GLOBAL = window;
+}
+
+// define unique collection storage, experimental
+const TYPE_STORAGE_KEY = Symbol.for(`@uon/model/type-manager`);
+if (!GLOBAL[TYPE_STORAGE_KEY]) {
+    GLOBAL[TYPE_STORAGE_KEY] = new Map<Type<any>, any>();
+}
+const TYPE_STORAGE =  GLOBAL[TYPE_STORAGE_KEY];
+
+
 
 export interface TypeDefinition<T> {
 
@@ -15,7 +34,7 @@ export interface TypeDefinition<T> {
 
 export class TypeManager {
 
-    static readonly TYPES: Map<Type<any>, any> = new Map();
+   // static readonly TYPES: Map<Type<any>, any> = new Map();
 
 
     /**
@@ -25,7 +44,7 @@ export class TypeManager {
      */
     static Register<T>(type: Type<T>, def: TypeDefinition<T>) {
 
-        this.TYPES.set(type, def);
+        TYPE_STORAGE.set(type, def);
     }
 
     /**
@@ -33,7 +52,7 @@ export class TypeManager {
      * @param type 
      */
     static HasType<T>(type: Type<T>) {
-        return this.TYPES.has(type);
+        return TYPE_STORAGE.has(type);
     }
 
     /**
@@ -42,7 +61,7 @@ export class TypeManager {
      */
     static Serialize<T>(type: Type<any>, obj: T | T[]): any {
 
-        const def = this.TYPES.get(type);
+        const def = TYPE_STORAGE.get(type);
 
         if (!def) {
             throw new Error(`TypeManager : Type ${type.name} is not defined`);
@@ -86,7 +105,7 @@ export class TypeManager {
     static Deserialize<T>(type: Type<T>, obj: any): T | T[] {
 
         //const ctor: any = (obj as any).constructor;
-        const def = this.TYPES.get(type);
+        const def = TYPE_STORAGE.get(type);
 
         if (!def) {
             throw new Error(`TypeManager : Type ${type.name} is not defined`);
@@ -125,7 +144,7 @@ export class TypeManager {
 
     static Validate<T>(type: Type<T>, obj: any): boolean {
 
-        const def = this.TYPES.get(type);
+        const def = TYPE_STORAGE.get(type);
 
         if (def.validate) {
 
@@ -186,7 +205,29 @@ TypeManager.Register(Date, {
 TypeManager.Register(Object, {
 
     serialize(value: Object) {
-        return value;
+
+        let source: any = value;
+        let result: any = {};
+
+        for(let i in source) {
+
+            let val = source[i]
+
+            if(val === undefined) {
+                continue;   
+            }
+
+            if(val === null) {
+                result[i] = null;
+            }
+            else {
+                let type = val.constructor;
+                result[i] = TypeManager.Serialize(type, source[i]);
+            }
+            
+        }
+
+        return result;
     },
 
     deserialize(value: any): Object {
