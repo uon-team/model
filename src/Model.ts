@@ -1,5 +1,5 @@
 
-import { Type, GetOrDefineMetadata, META_PROPERTIES, META_ANNOTATIONS, GetMetadata, TypeDecorator, MakeTypeDecorator } from '@uon/core'
+import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata } from '@uon/core'
 import { Field, ID } from './Field';
 import { Validate } from './Validate';
 import { TypeManager } from './TypeManager';
@@ -17,7 +17,6 @@ export interface ModelDecorator {
 }
 
 
-
 export const Model: ModelDecorator =
     MakeTypeDecorator("Model", (fields: any) => ({ fields }), null,
         (target: Type<any>, meta: Model) => {
@@ -26,7 +25,7 @@ export const Model: ModelDecorator =
             meta.type = target;
 
             // get all defined field
-            let fields: any = GetOrDefineMetadata(META_PROPERTIES, target.prototype, {});
+            let fields: any = GetPropertiesMetadata(target.prototype) || {};
 
             meta.fields = fields;
 
