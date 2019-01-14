@@ -1,6 +1,6 @@
 # UON Model
 
-A database agnostic, decorator-based schema/model library.
+A decorator-based schema/model library with json and binary (de)serialization.
 
 ## Getting started
 
@@ -16,51 +16,68 @@ Model definitions are expressed in the following way:
 
 ```typescript
 
-import { Model, Field, ID } from '@uon/model'
+import { Model, Member, ArrayMember } from '@uon/model'
 
 @Model()
 export class MyModel {
 
-    @Field() myStringField: string;
+    // Generic member supports String, Boolean, Number and Date types
+    @Member() myStringField: string;
 
-    @Field() myObjField: object;
-
-    // for array fields you need to specify the array element type
+    // For array members you need to specify the array element type
     // as a decorator argument due to TypeScript not emiting array element type
-    @Field(String) myArrayField: string[]
+    @ArrayMember(String) myArrayField: string[];
+
 
 }
 ```
 
-## TypeManager
-The TypeManager static class serves a repository for serializable type. When a type is decorated with @Model(), the type is registered with TypeManager.
+### TypedNumber
 
+In order to efficiently serialize to binary, number types have been added.
+
+Generic members with type Number are treated as Float64.
+
+```typescript
+@Model()
+export class MyModel {
+
+    // Supported number types are Int8, Int16, Int32, Uint8, Uint16, Uint32, Float32 and Float64
+    @NumberMember(Uint8) myByte: number;
+
+    // You can also use a TypedNumber as array element type 
+    @ArrayMember(Uint32) myNumberArray: number[];
+
+}
+
+```
 
 ### Serialization
 
-Only JSON serialization is supported as of now. Binary serialization is in the works.
-
-To serialize a instance or array of instances you can use:
+To serialize a model instance:
 
 ```typescript
 let obj = new MyModel();
-let serialized = JSON.stringify(TypeManager.Serialize(MyModel, obj));
+let serializer = new JsonSerializer(MyModel);
+let serialized_str = JSON.stringify(serializer.serialize(obj));
 ```
-Note that TypeManager.Serialize does not return a JSON string but rather a JSON object using only basic types (String, Number, Boolean, Array, Object and Date).
+Note that serializer.serialize does not return a JSON string but rather a JSON object using only builtin types (String, Number, Boolean, Array, Object and Date).
 
 ### Deserialization
 To deserialize, we do the following:
 ```typescript
-let json_obj = JSON.parse(my_json_str);
-let my_obj = TypeManager.Deserialize(MyModel, json_obj);
+let serializer = new JsonSerializer(MyModel);
+let my_obj = serializer.deserialize(JSON.parse(my_json_str));
 ```
 
 ## Limitations
 
-- Cannot yet have an array of arrays as field definition
+- Array members are limited to 1 dimension, n-dimensional arrays might be supported in the future.
 
 
-## Future
+## TODO
 
-- Binary serialization (add number types)
-- Move JSON serialization to own interface (ditching TypeManager)
+- Add serialization support for builtin typed arrays line Uint8Array, etc...
+- Handle array element validation, also TypedNumbers range
+- Complete this README
+

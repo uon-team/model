@@ -1,123 +1,114 @@
 
-import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata } from '@uon/core'
-import { Field, ID } from './Field';
-import { Validate } from './Validate';
-import { TypeManager } from './TypeManager';
+import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique } from '@uon/core'
+import { Member, ID } from './Member';
+import { ArrayMember } from './ArrayMember';
 
 
 // a weak map to keep dirty fields for models
-const DIRTY_FIELDS_WEAPMAP = new WeakMap();
+const DIRTY_FIELDS_WEAPMAP = new WeakMap<object, { [k: string]: boolean }>();
 
 // a weakmap to keep data
 const DATA_WEAKMAP: WeakMap<object, any> = new WeakMap<object, any>();
 
 export interface ModelDecorator {
     (): TypeDecorator;
-    new(...args: any[]): Model
+    new(): Model;
+
+    /**
+     * Clear all dirty flags from a model instance
+     * @param obj 
+     */
+    MakeClean<T>(obj: T): void;
+
+    /**
+     * Get a list of dirty properties from a model instance
+     * @param obj 
+     */
+    GetDirty<T>(obj: T): { [k: string]: boolean };
 }
 
 
-export const Model: ModelDecorator =
-    MakeTypeDecorator("Model", (fields: any) => ({ fields }), null,
+/**
+ * Declare a class as a Model to enable validation and typed serialization
+ */
+export interface Model {
+    type: Type<any>;
+    properties: { [k: string]: any[] }
+    id: ID;
+}
+
+export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
+    MakeTypeDecorator("Model",
+        () => ({}),
+        null,
         (target: Type<any>, meta: Model) => {
 
             // assign type to model
             meta.type = target;
 
-            // get all defined field
-            let fields: any = GetPropertiesMetadata(target.prototype) || {};
+            // get property annotations map
+            const properties_meta: any = GetPropertiesMetadata(target.prototype) || {};
+            meta.properties = properties_meta;
 
-            meta.fields = fields;
 
-            let id_field: ID;
+            // the unique ID field
+            let id_meta: ID;
 
-            // replace member with getter setter
-            for (let name in fields) {
+            // go over all decorated properties
+            for (let name in properties_meta) {
 
-                let model_annotations = fields[name];
+                // get member decoration only
+                const filtered: Member[] = properties_meta[name].filter((a: any) => {
+                    return a instanceof Member;
+                });
 
-                // try an find an ID field
-                const id = ExtractMetaFromArray(fields[name], ID);
-                if (id) {
-
-                    // we can only have a single ID field
-                    if (id_field) {
-                        throw new Error(`Model: ${target.name} has more then 1 ID() decorator.`);
-                    }
-
-                    meta.idField = id;
-                    id_field = id;
+                // can only have one Member type decorator on a property
+                if (filtered.length > 1) {
+                    throw new Error(`Can only have 1 Member decorator on a property, got ${filtered.length} on ${target.name}.${name}`);
                 }
 
+                if (filtered.length === 1) {
+                    let m = filtered[0];
 
-                // replace field with getter setter
-                ReplacePropertyWithGetterSetter(target.prototype, name, model_annotations);
+                    // check if this is an ID
+                    if (m instanceof ID) {
+
+                        // ID already set, this is a user error
+                        if (meta.id) {
+                            throw new Error(`Model: ${target.name} has more then 1 ID() decorator.`);
+                        }
+
+                        meta.id = m;
+
+                    }
+
+                    // replace field with getter setter
+                    ReplacePropertyWithGetterSetter(target.prototype, name, m);
+                }
 
             }
-
-            // build a serialization function for this model
-            const serialize = GetModelSerializeFunction(target, fields);
-
-            // build a deserialization function for this model
-            const deserialize = GetModelDeserializeFunction(target, fields);
-
-            // Register type with type manager
-            TypeManager.Register(target, { serialize, deserialize });
 
             // return the original class target
             return target;
 
+        }));
 
-        });
+// MakeClean implementation
+Model.MakeClean = function MakeClean<T>(obj: T): void {
 
-/**
- * Model interface
- */
-export interface Model {
-    type: Type<any>;
-    fields: { [k: string]: any[] }
-    idField: ID;
-}
-
-/**
- * Get a list of Field metadata from the Model metadata
- * @param m 
- */
-export function GetModelFieldList(m: Model) {
-
-    let result: Field[] = []
-    for (let key in m.fields) {
-        result.push(ExtractMetaFromArray(m.fields[key], Field));
-    }
-
-    return result.filter(v => v !== null);
-}
-
-/**
- * Reset the dirty fields on an object
- * @param m 
- */
-export function ClearModelDirtyFields<T>(m: T) {
-
-    const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, m as any);
-
+    const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, obj as any);
     let keys = Object.keys(dirty);
     keys.forEach((k) => {
         delete dirty[k];
     });
 }
 
-/**
- * Retrieve the dirty fields as key/value map
- * @param m 
- */
-export function GetModelDirtyFields<T>(m: T) {
+// GetDirty implementation
+Model.GetDirty = function GetDirty<T>(obj: T): { [k: string]: boolean } {
+    const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, obj as any);
+    return dirty
 
-    const dirty = DIRTY_FIELDS_WEAPMAP.get(m as any);
-    return dirty;
 }
-
-
 
 
 /**
@@ -127,27 +118,10 @@ export function GetModelDirtyFields<T>(m: T) {
  * @param key 
  * @param annotations 
  */
-function ReplacePropertyWithGetterSetter(target: any, key: string, annotations: any[]) {
+function ReplacePropertyWithGetterSetter(target: any, key: string, member: Member) {
 
-    let field: Field | ID;
-    let id: ID;
-    let validators: Validate;
-
-    for (let i = 0; i < annotations.length; i++) {
-        let a = annotations[i];
-        if (a instanceof Validate) {
-            validators = a;
-        }
-        else if (a instanceof Field) {
-            field = a;
-        }
-        else if (a instanceof ID) {
-            field = a;
-        }
-    }
-
-    // no field defined, no bueno
-    if (!field) {
+    // no member meta defined, no bueno
+    if (!member) {
         return;
     }
 
@@ -158,32 +132,9 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, annotations: 
     };
 
     // property setter
-    const setter = function (newVal: any) {
-
-        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
-        const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, this);
-
-        let old_val = data[key];
-        let val: any = newVal;
-
-        // execute validators
-        if (validators) {
-            let errors = ExecuteValidators(this, key, val, validators.validators);
-            if (errors.length) {
-                throw errors;
-            }
-        }
-
-        // special case for arrays
-        if ((field as Field).arrayType && val) {
-
-            val = new Proxy(val, GetArrayProxyHandler(this, key));
-
-        }
-
-        dirty[key] = true;
-        data[key] = val;
-    };
+    const setter = member instanceof ArrayMember
+        ? CreateArraySetter(key)
+        : CreateGenericSetter(key);
 
     // delete property.
     if (delete target[key]) {
@@ -197,6 +148,40 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, annotations: 
         });
     }
 
+}
+
+function CreateGenericSetter(key: string) {
+
+    return function generic_setter(val: any) {
+
+        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
+        const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, this);
+
+        // set field as dirty
+        dirty[key] = true;
+
+        // set new value
+        data[key] = val;
+    }
+}
+
+function CreateArraySetter(key: string) {
+
+    return function array_setter(val: any) {
+
+        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
+        const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, this);
+
+        if (val) {
+            val = new Proxy(val, GetArrayProxyHandler(this, key));
+        }
+
+        // set field as dirty
+        dirty[key] = true;
+
+        // set new value
+        data[key] = val;
+    }
 }
 
 /**
@@ -244,126 +229,6 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
     };
 }
 
-
-/**
- * 
- * @param model 
- * @param key 
- * @param newValue 
- * @param validators 
- */
-function ExecuteValidators(model: any, key: string, newValue: any, validators: Function[]): Error[] {
-
-    let errors: Error[] = [];
-
-    for (let i = 0; i < validators.length; ++i) {
-
-        try {
-            validators[i](model, key, newValue);
-        }
-        catch (err) {
-            errors.push(err);
-        }
-
-
-    }
-
-    return errors;
-
-}
-
-/**
- * 
- * @param type 
- * @param annotations 
- */
-function GetModelSerializeFunction<T>(type: Type<T>, annotations: any): any {
-
-
-    const fields: Field[] = [];
-    for (let name in annotations) {
-        fields.push(
-            ExtractMetaFromArray(annotations[name], Field) ||
-            ExtractMetaFromArray(annotations[name], ID));
-    }
-
-    return function (val: any): any {
-
-        //if(!val) return val;
-
-        let result: any = {};
-
-        for (let i = 0; i < fields.length; ++i) {
-
-            let field: Field = fields[i];
-            let v = val[field.key];
-
-            if (v) {
-                v = TypeManager.Serialize(field.arrayType || field.type, v);
-            }
-
-            result[field.key] = v;
-        }
-
-        return result;
-    };
-}
-
-/**
- * 
- * @param type 
- * @param annotations 
- */
-function GetModelDeserializeFunction<T>(type: Type<T>, annotations: any): any {
-
-    const fields: Field[] = [];
-    for (let name in annotations) {
-        fields.push(
-            ExtractMetaFromArray(annotations[name], Field) ||
-            ExtractMetaFromArray(annotations[name], ID));
-    }
-
-    return function (val: any): any {
-
-        let result = new (type as any)();
-
-        for (let i = 0; i < fields.length; ++i) {
-
-            let field: Field = fields[i];
-            let v = val[field.key];
-
-            if (v === undefined) {
-                continue;
-            }
-
-            v = TypeManager.Deserialize(field.arrayType || field.type, v);
-
-            result[field.key] = v;
-        }
-
-        ClearModelDirtyFields(result);
-
-        return result;
-
-    };
-}
-
-/**
- * 
- * @param arr 
- * @param type 
- */
-function ExtractMetaFromArray(arr: any[], type: any) {
-
-    for (let i = 0; i < arr.length; ++i) {
-
-        if (arr[i] instanceof type) {
-            return arr[i];
-        }
-    }
-
-    return null;
-}
 
 
 /**

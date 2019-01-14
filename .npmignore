@@ -6,4 +6,4 @@
 /typings
 /src
 *.log
-index.ts
+test.ts
