@@ -64,7 +64,7 @@ export async function Validate<T>(target: T): Promise<ValidationResult<T>> {
             for(let j = 0, jl = validators.length; j < jl; ++j) {
 
                 try {
-                    await validators[i](target, member.key, (target as any)[member.key])
+                    await validators[j](target, member.key, (target as any)[member.key])
                 }
                 catch(err) {
 
