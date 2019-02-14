@@ -93,12 +93,6 @@ class JsonSerializerImpl<T> {
                 this._deserializeStack[member.key] = CreateArrayHandler(deserialize_handler);
 
             }
-            // handle number member
-            else if (member instanceof NumberMember) {
-                this._serializeStack[member.key] = NumberHandler;
-                this._deserializeStack[member.key] = NumberHandler;
-            }
-            // handle generic member
             else {
                 this._serializeStack[member.key] = GetSerializeHandler(member.type);
                 this._deserializeStack[member.key] = GetDeserializeHandler(member.type);

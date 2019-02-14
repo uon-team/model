@@ -10,7 +10,9 @@
   "dependencies": {
     "@uon/core": "^0.4.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^10.12.18"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/uon-team/model.git"

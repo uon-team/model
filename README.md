@@ -79,5 +79,6 @@ let my_obj = serializer.deserialize(JSON.parse(my_json_str));
 
 - Add serialization support for builtin typed arrays line Uint8Array, etc...
 - Handle array element validation, also TypedNumbers range
+- Add support for external classes; something like Modelize(Vector2, { x: NumberMember(Float32), y: NumberMember(Float32)});
 - Complete this README
 

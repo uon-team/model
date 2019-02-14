@@ -61,7 +61,7 @@ export const NumberMember: NumberMemberDecorator = MakeUnique(`@uon/model/Number
             // get the field type 
             let type: Type<any> = GetMetadata('design:type', target, key);
 
-            if (type != Number) {
+            if (type && type != Number) {
                 throw new Error(`NumberType decorator can only be declared on property with type Number`);
             }
 

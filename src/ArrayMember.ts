@@ -28,7 +28,7 @@ export const ArrayMember: ArrayMemberDecorator = MakeUnique(`@uon/model/ArrayMem
             let type: Type<any> = GetMetadata('design:type', target, key);
 
             // can only user ArrayMember decorator on array members
-            if (type != Array) {
+            if (type && type != Array) {
                 throw new Error("You can only use ArrayMember on array members.");
             }
 

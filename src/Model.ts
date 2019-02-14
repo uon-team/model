@@ -1,5 +1,5 @@
 
-import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique } from '@uon/core'
+import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
 import { Member, ID } from './Member';
 import { ArrayMember } from './ArrayMember';
 
@@ -28,14 +28,7 @@ export interface ModelDecorator {
 }
 
 
-/**
- * Declare a class as a Model to enable validation and typed serialization
- */
-export interface Model {
-    type: Type<any>;
-    properties: { [k: string]: any[] }
-    id: ID;
-}
+
 
 export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
     MakeTypeDecorator("Model",
@@ -93,6 +86,15 @@ export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
 
         }));
 
+/**
+ * Declare a class as a Model to enable validation and typed serialization
+ */
+export interface Model {
+    type: Type<any>;
+    properties: { [k: string]: any[] }
+    id: ID;
+}
+
 // MakeClean implementation
 Model.MakeClean = function MakeClean<T>(obj: T): void {
 
@@ -107,6 +109,25 @@ Model.MakeClean = function MakeClean<T>(obj: T): void {
 Model.GetDirty = function GetDirty<T>(obj: T): { [k: string]: boolean } {
     const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, obj as any);
     return dirty
+
+}
+
+export function Modelize(cls: Type<any>, def: {[k: string]: PropDecorator}) {
+
+    let model_decorator = Model();
+
+    let proto = cls.prototype;
+
+    for(let key in def) {
+
+        let dec = def[key];
+
+        dec(proto, key);
+    }
+
+
+    // call model decorator
+    model_decorator(cls);
 
 }
 
