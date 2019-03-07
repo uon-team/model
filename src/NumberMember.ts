@@ -10,6 +10,8 @@ import { Member } from './Member';
 
 
 export class TypedNumber {
+    // duck typing madness
+    __TypedNumber = true;
     constructor(readonly name: string, readonly size: number) {}
 }
 
@@ -36,7 +38,6 @@ export const Float32 = MakeUnique(`@uon/model/Float32`, new TypedNumber('Float32
 export const Float64 = MakeUnique(`@uon/model/Float64`, new TypedNumber('Float64', 8));
 
 export type NumberType = Int8 | Int16 | Int32 | Int64 | Uint8 | Uint16 | Uint32 | Uint64 | Float32 | Float64;
-
 
 
 export interface NumberMemberDecorator {

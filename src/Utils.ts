@@ -3,7 +3,8 @@ import { Model } from "./Model";
 import { Member } from "./Member";
 
 
-
+declare function atob(str: string): string;
+declare function btoa(str: string): string;
 
 /**
  * Given a type, find a @Model annotation

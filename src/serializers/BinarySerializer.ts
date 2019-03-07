@@ -419,7 +419,7 @@ function ConcatBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
 }
 
 
-function GetSerializeHandler(type: Type<any> | TypedNumber) {
+function GetSerializeHandler(type: Type<any> | any) {
 
     if (type === String) return StringToBinary;
     if (type === Boolean) return BooleanToBinary;
@@ -451,7 +451,7 @@ function GetSerializeHandler(type: Type<any> | TypedNumber) {
 }
 
 
-function GetDeserializeHandler(type: Type<any> | TypedNumber) {
+function GetDeserializeHandler(type: Type<any> | any) {
 
     if (type === String) return ReadString;
     if (type === Boolean) return ReadBoolean;
