@@ -22,12 +22,13 @@ import { Model, Member, ArrayMember } from '@uon/model'
 export class MyModel {
 
     // Generic member supports String, Boolean, Number and Date types
-    @Member() myStringField: string;
+    @Member() 
+    myStringField: string;
 
     // For array members you need to specify the array element type
     // as a decorator argument due to TypeScript not emiting array element type
-    @ArrayMember(String) myArrayField: string[];
-
+    @ArrayMember(String) 
+    myArrayField: string[];
 
 }
 ```
@@ -42,7 +43,7 @@ Generic members with type Number are treated as Float64.
 @Model()
 export class MyModel {
 
-    // Supported number types are Int8, Int16, Int32, Uint8, Uint16, Uint32, Float32 and Float64
+    // Supported number types are Int8, Int16, Int32, Uint8, Uint16, Uint32, Float32 and Float64, (no (U)Int64 yet)
     @NumberMember(Uint8) myByte: number;
 
     // You can also use a TypedNumber as array element type 
@@ -77,8 +78,7 @@ let my_obj = serializer.deserialize(JSON.parse(my_json_str));
 
 ## TODO
 
-- Add serialization support for builtin typed arrays line Uint8Array, etc...
+- Add serialization support for builtin typed arrays (Uint8Array, etc...)
 - Handle array element validation, also TypedNumbers range
-- Add support for external classes; something like Modelize(Vector2, { x: NumberMember(Float32), y: NumberMember(Float32)});
 - Complete this README
 

@@ -54,7 +54,7 @@ export interface NumberMember {
 }
 
 export const NumberMember: NumberMemberDecorator = MakeUnique(`@uon/model/NumberMember`,
-    MakePropertyDecorator("NumberType",
+    MakePropertyDecorator("NumberMember",
         (type: NumberType) => ({ type }),
         Member,
         (target: any, meta: NumberMember, key: string) => {
@@ -69,6 +69,3 @@ export const NumberMember: NumberMemberDecorator = MakeUnique(`@uon/model/Number
             meta.key = key;
 
         }));
-
-
-
