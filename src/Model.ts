@@ -2,6 +2,7 @@
 import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
 import { Member, ID } from './Member';
 import { ArrayMember } from './ArrayMember';
+import { Mutations } from './Mutation';
 
 
 // a weak map to keep dirty fields for models
@@ -24,12 +25,20 @@ export interface ModelDecorator {
      * Get a list of dirty properties from a model instance
      * @param obj 
      */
-    GetDirty<T>(obj: T): { [k: string]: boolean };
+    GetMutations<T>(obj: T): Mutations<T>;
 }
 
 
 
+export interface ModelOptions {
 
+
+}
+
+
+/**
+ * 
+ */
 export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
     MakeTypeDecorator("Model",
         () => ({}),
@@ -106,29 +115,31 @@ Model.MakeClean = function MakeClean<T>(obj: T): void {
 }
 
 // GetDirty implementation
-Model.GetDirty = function GetDirty<T>(obj: T): { [k: string]: boolean } {
+Model.GetMutations = function GetMutations<T>(obj: T): Mutations<T> {
     const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, obj as any);
-    return dirty
+    return dirty;
 
 }
 
-export function Modelize(cls: Type<any>, def: {[k: string]: PropDecorator}) {
 
-    let model_decorator = Model();
+/**
+ * Apply member decorators to an existing non-decorated class.
+ * 
+ * @param cls 
+ * @param def 
+ */
+export function Modelize<T>(cls: Type<T>, def: { [K in keyof T]: T[K] extends Function ? never : PropDecorator }) {
 
-    let proto = cls.prototype;
+    const model_decorator = Model();
+    const proto = cls.prototype;
 
-    for(let key in def) {
-
-        let dec = def[key];
-
+    for (let key in def) {
+        const dec = def[key];
         dec(proto, key);
     }
 
-
     // call model decorator
     model_decorator(cls);
-
 }
 
 
@@ -205,6 +216,8 @@ function CreateArraySetter(key: string) {
     }
 }
 
+
+const ARRAY_MUTATION_FUNC_NAMES = ['push', 'unshift', 'pop', 'shift', 'splice'];
 /**
  * @private
  * Generate a ProxyHandler for an array field
@@ -220,19 +233,17 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
             const val = target[prop];
             const func_name = prop as string;
             if (typeof val === 'function') {
-                if (['push', 'unshift', 'pop', 'shift', 'splice'].indexOf(prop as string) > -1) {
+                if (ARRAY_MUTATION_FUNC_NAMES.indexOf(prop as string) > -1) {
                     return function () {
-                        dirty[key] = true;
+
+                        if (dirty[key] !== true) {
+                            dirty[key] = dirty[key] || [];
+                            dirty[key].push({ op: prop as string, args: arguments });
+                        }
+
                         return (Array.prototype as any)[func_name].apply(target, arguments);
                     }
                 }
-                /* if (['pop', 'shift', 'splice'].indexOf(prop as string) > -1) {
-                     return function () {
-                         dirty[key] = true;
-                         const el = (Array.prototype as any)[func_name].apply(target, arguments);
-                         return el;
-                     }
-                 }*/
 
                 return val.bind(target);
             }
@@ -243,7 +254,12 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
         set(target, prop, val, receiver) {
 
             target[prop] = val;
-            dirty[key] = true;
+
+            if (dirty[key] !== true) {
+                dirty[key] = dirty[key] || [];
+                dirty[key].push({ op: 'set', args: [prop as number] });
+            }
+
 
             return true;
         }
