@@ -4,7 +4,7 @@ import { Model } from '../Model';
 import { Member, ID } from '../Member';
 import { TypedNumber, NumberMember } from '../NumberMember';
 import { ArrayMember } from '../ArrayMember';
-import { FindModelAnnotation, GetModelMembers } from '../Utils';
+import { FindModelAnnotation, GetModelMembers, IsTypedArrayType } from '../Utils';
 
 const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/json/impl-cache`,
     new Map<Type<any>, JsonSerializerImpl<any>>());
@@ -78,7 +78,7 @@ class JsonSerializerImpl<T> {
         // grab members metadata
         const members_meta: Member[] = GetModelMembers(model_meta);
 
-        // go over each member meta and create grab it's type serialization function
+        // go over each member meta and create it's type serialization function
         for (let i = 0, l = members_meta.length; i < l; ++i) {
 
             const member = members_meta[i];
@@ -189,7 +189,13 @@ function GetSerializeHandler(type: Type<any>) {
     if (type === Boolean) return BooleanHandler;
     if (type === Date) return DateHandler;
     if (type === Number) return NumberHandler;
-    if (type instanceof TypedNumber) return NumberHandler;
+    if ((type as any).__TypedNumber === true) return NumberHandler;
+
+
+    /* 
+  if (IsTypedArrayType(type)) {
+
+  }*/
 
     // test if we have a model
     if (FindModelAnnotation(type)) {
@@ -212,7 +218,12 @@ function GetDeserializeHandler(type: Type<any>) {
     if (type === Boolean) return BooleanHandler;
     if (type === Date) return DateHandler;
     if (type === Number) return NumberHandler;
-    if (type instanceof TypedNumber) return NumberHandler;
+    if ((type as any).__TypedNumber === true) return NumberHandler;
+
+    /* 
+    if (IsTypedArrayType(type)) {
+
+    }*/
 
     // test if we have a model
     if (FindModelAnnotation(type)) {

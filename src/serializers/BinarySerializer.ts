@@ -425,16 +425,16 @@ function GetSerializeHandler(type: Type<any> | any) {
     if (type === Boolean) return BooleanToBinary;
     if (type === Date) return DateToBinary;
     if (type === Number) return Float64ToBuffer;
-    if (type instanceof TypedNumber) {
-        if (type === Int8) return Int8ToBuffer;
-        else if (type === Int16) return Int16ToBuffer;
-        else if (type === Int32) return Int32ToBuffer;
-        else if (type === Uint8) return Uint8ToBuffer;
-        else if (type === Uint16) return Uint16ToBuffer;
-        else if (type === Uint32) return Uint32ToBuffer;
-        else if (type === Float32) return Float32ToBuffer;
-        else if (type === Float64) return Float64ToBuffer;
-    }
+
+    if (type === Int8) return Int8ToBuffer;
+    else if (type === Int16) return Int16ToBuffer;
+    else if (type === Int32) return Int32ToBuffer;
+    else if (type === Uint8) return Uint8ToBuffer;
+    else if (type === Uint16) return Uint16ToBuffer;
+    else if (type === Uint32) return Uint32ToBuffer;
+    else if (type === Float32) return Float32ToBuffer;
+    else if (type === Float64) return Float64ToBuffer;
+
 
     // test if we have a model
     if (FindModelAnnotation(type as Type<any>)) {
@@ -457,16 +457,16 @@ function GetDeserializeHandler(type: Type<any> | any) {
     if (type === Boolean) return ReadBoolean;
     if (type === Date) return ReadDate;
     if (type === Number) return ReadFloat64;
-    if (type instanceof TypedNumber) {
-        if (type === Int8) return ReadInt8;
-        else if (type === Int16) return ReadInt16;
-        else if (type === Int32) return ReadInt32;
-        else if (type === Uint8) return ReadUint8;
-        else if (type === Uint16) return ReadUint16;
-        else if (type === Uint32) return ReadUint32;
-        else if (type === Float32) return ReadFloat32;
-        else if (type === Float64) return ReadFloat64;
-    }
+
+    if (type === Int8) return ReadInt8;
+    else if (type === Int16) return ReadInt16;
+    else if (type === Int32) return ReadInt32;
+    else if (type === Uint8) return ReadUint8;
+    else if (type === Uint16) return ReadUint16;
+    else if (type === Uint32) return ReadUint32;
+    else if (type === Float32) return ReadFloat32;
+    else if (type === Float64) return ReadFloat64;
+
 
     // test if we have a model
     if (FindModelAnnotation(type as Type<any>)) {

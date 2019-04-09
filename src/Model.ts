@@ -12,26 +12,30 @@ const DIRTY_FIELDS_WEAPMAP = new WeakMap<object, { [k: string]: boolean }>();
 const DATA_WEAKMAP: WeakMap<object, any> = new WeakMap<object, any>();
 
 export interface ModelDecorator {
-    (): TypeDecorator;
-    new(): Model;
+    (options?: ModelOptions): TypeDecorator;
+    new(options?: ModelOptions): Model;
 
     /**
-     * Clear all dirty flags from a model instance
+     * Clear all mutation flags from a model instance
      * @param obj 
      */
     MakeClean<T>(obj: T): void;
 
     /**
-     * Get a list of dirty properties from a model instance
+     * Get a list of mutations since last cleanup from a model instance
      * @param obj 
      */
     GetMutations<T>(obj: T): Mutations<T>;
+
 }
 
 
 
 export interface ModelOptions {
 
+    version?: number;
+    name?: string;
+    description?: string;
 
 }
 
@@ -51,10 +55,6 @@ export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
             // get property annotations map
             const properties_meta: any = GetPropertiesMetadata(target.prototype) || {};
             meta.properties = properties_meta;
-
-
-            // the unique ID field
-            let id_meta: ID;
 
             // go over all decorated properties
             for (let name in properties_meta) {
