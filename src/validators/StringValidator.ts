@@ -22,7 +22,7 @@ export function MinLength(min: number) {
         let str_len = val.length;
 
         if (str_len < min) {
-            throw new ValidationFailure(MinLength, key, val, `minimum length is ${min}, but got ${str_len}`);
+            throw new ValidationFailure(MinLength, key, val, `below minimum length`);
         }
 
         return val;
@@ -37,7 +37,7 @@ export function MaxLength(max: number) {
         let str_len = val.length;
 
         if (str_len > max) {
-            throw new ValidationFailure(MaxLength, key, val, `maximum length is ${max}, but got ${str_len}`);
+            throw new ValidationFailure(MaxLength, key, val, `above maximum length`);
         }
 
         return val;

@@ -1,10 +1,10 @@
 
 import { Type, GetTypeMetadata, MakeUnique } from '@uon/core';
-import { Model } from '../Model';
 import { Member, ID } from '../Member';
 import { TypedNumber, NumberMember } from '../NumberMember';
 import { ArrayMember } from '../ArrayMember';
 import { FindModelAnnotation, GetModelMembers, IsTypedArrayType } from '../Utils';
+import { ClearMutations } from '../Mutation';
 
 const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/json/impl-cache`,
     new Map<Type<any>, JsonSerializerImpl<any>>());
@@ -60,7 +60,7 @@ class JsonSerializerImpl<T> {
         }
 
         // clear dirty fields as this is a brand new instance
-        Model.MakeClean(result);
+        ClearMutations(result);
 
         return result as T;
     }
@@ -131,6 +131,14 @@ export class JsonSerializer<T> {
     }
 
     /**
+     * Shortcut for serializing array
+     * @param val 
+     */
+    serializeAll(val: T[]): object[] {
+        return val.map(t => this._impl.serialize(t));
+    }
+
+    /**
      * Deserialize a value to the provided type
      * @param type 
      * @param val 
@@ -140,10 +148,16 @@ export class JsonSerializer<T> {
         return this._impl.deserialize(val);
     }
 
+    /**
+     * Shorcut for deserializing array
+     * @param val 
+     */
+    deserializeAll(val: object[]): T[] {
+        return val.map(t => this._impl.deserialize(t));
+    }
+
 
 }
-
-
 
 
 

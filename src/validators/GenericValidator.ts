@@ -3,18 +3,23 @@
 
 
 import { ValidationFailure } from '../Validate';
+import { Injectable } from '@uon/core';
 
 
 export function Required() {
 
-    return function (model: any, key: string, val: any) {
+    const func = function required(model: any, key: string, val: any) {
 
         if (val === null || val === undefined) {
-            throw new ValidationFailure(Required, key, val, `a value is required`);
+            throw new ValidationFailure(Required, key, val, `field is required`);
         }
 
         return val;
 
     }
+
+    func._forceValidation = true;
+
+    return func;
 
 }

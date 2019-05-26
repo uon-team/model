@@ -2,11 +2,11 @@
 import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
 import { Member, ID } from './Member';
 import { ArrayMember } from './ArrayMember';
-import { Mutations } from './Mutation';
+import { Mutations, MUTATIONS_WEAPMAP, GetOrDefineInWeakMap } from './Mutation';
+import { JsonSerializer } from './serializers/JsonSerializer';
+import { Validator } from './Validate';
 
 
-// a weak map to keep dirty fields for models
-const DIRTY_FIELDS_WEAPMAP = new WeakMap<object, { [k: string]: boolean }>();
 
 // a weakmap to keep data
 const DATA_WEAKMAP: WeakMap<object, any> = new WeakMap<object, any>();
@@ -52,6 +52,9 @@ export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
             // assign type to model
             meta.type = target;
 
+            // keep a list of validators handy
+            meta.validators = {};
+
             // get property annotations map
             const properties_meta: any = GetPropertiesMetadata(target.prototype) || {};
             meta.properties = properties_meta;
@@ -84,10 +87,20 @@ export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
 
                     }
 
+                    if(m.validators) {
+                        meta.validators[m.key] = m.validators;
+                    }
+
                     // replace field with getter setter
                     ReplacePropertyWithGetterSetter(target.prototype, name, m);
                 }
 
+            }
+
+
+            target.prototype.toJSON = function () {
+                const serializer = new JsonSerializer(target);
+                return serializer.serialize(this);
             }
 
             // return the original class target
@@ -100,14 +113,15 @@ export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
  */
 export interface Model {
     type: Type<any>;
-    properties: { [k: string]: any[] }
+    properties: { [k: string]: any[] };
+    validators: { [k: string]: Validator[] };
     id: ID;
 }
 
 // MakeClean implementation
 Model.MakeClean = function MakeClean<T>(obj: T): void {
 
-    const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, obj as any);
+    const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, obj as any);
     let keys = Object.keys(dirty);
     keys.forEach((k) => {
         delete dirty[k];
@@ -116,7 +130,7 @@ Model.MakeClean = function MakeClean<T>(obj: T): void {
 
 // GetDirty implementation
 Model.GetMutations = function GetMutations<T>(obj: T): Mutations<T> {
-    const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, obj as any);
+    const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, obj as any);
     return dirty;
 
 }
@@ -187,7 +201,7 @@ function CreateGenericSetter(key: string) {
     return function generic_setter(val: any) {
 
         const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
-        const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, this);
+        const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, this);
 
         // set field as dirty
         dirty[key] = true;
@@ -202,7 +216,7 @@ function CreateArraySetter(key: string) {
     return function array_setter(val: any) {
 
         const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
-        const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, this);
+        const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, this);
 
         if (val) {
             val = new Proxy(val, GetArrayProxyHandler(this, key));
@@ -226,7 +240,7 @@ const ARRAY_MUTATION_FUNC_NAMES = ['push', 'unshift', 'pop', 'shift', 'splice'];
  */
 function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
 
-    const dirty = GetOrDefineInWeakMap(DIRTY_FIELDS_WEAPMAP, inst);
+    const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, inst);
 
     return {
         get(target, prop) {
@@ -267,19 +281,3 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
 }
 
 
-
-/**
- * 
- * @param map 
- * @param key 
- */
-function GetOrDefineInWeakMap(map: WeakMap<object, any>, key: object) {
-
-    let data = map.get(key);
-    if (!data) {
-        data = {}
-        map.set(key, data);
-    }
-
-    return data;
-}

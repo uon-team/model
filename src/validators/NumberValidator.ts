@@ -8,11 +8,11 @@ export function ValidateRange(min: number, max: number) {
     return function (model: any, key: string, val: number) {
 
         if (min !== null && val < min) {
-            throw new ValidationFailure(ValidateRange, key, val, `minimum value is ${min}, but got ${val}`);
+            throw new ValidationFailure(ValidateRange, key, val, `below minimum value`);
         }
 
         if (max !== null && val > max) {
-            throw new ValidationFailure(ValidateRange, key, val, `maximum value is ${max}, but got ${val}`);
+            throw new ValidationFailure(ValidateRange, key, val, `above maximum value`);
         }
 
         return val;

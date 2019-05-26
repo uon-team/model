@@ -16,7 +16,7 @@ export * from './Validate';
 export * from './validators/NumberValidator';
 export * from './validators/StringValidator';
 export * from './validators/EmailValidator';
-
+export * from './validators/GenericValidator';
 
 export * from './serializers/JsonSerializer';
 export * from './serializers/BinarySerializer';

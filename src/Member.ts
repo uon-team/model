@@ -3,7 +3,8 @@ import {
     Type,
     GetMetadata,
     MakePropertyDecorator,
-    MakeUnique
+    MakeUnique,
+    GetTypeMetadata
 } from '@uon/core'
 import { Validator } from './Validate';
 
@@ -30,6 +31,12 @@ export interface Member extends MemberOptions {
      * The field value type
      */
     type?: Type<any>;
+
+
+    /**
+     * if the member is a model, this field will be populated
+     */
+    model?: { id: ID };
 
 }
 
@@ -64,6 +71,7 @@ export const Member: MemberDecorator = MakeUnique(`@uon/model/Member`,
 
             // get the field type 
             let type: Type<any> = GetMetadata('design:type', target, key);
+            let annotations = GetTypeMetadata(type);
 
             // ArrayMember must be used for arrays
             if (type == Array) {
@@ -72,6 +80,7 @@ export const Member: MemberDecorator = MakeUnique(`@uon/model/Member`,
 
             meta.key = key;
             meta.type = type;
+            meta.model = annotations.find(a => a.decoratorName === 'Model');
 
         }));
 
