@@ -53,18 +53,33 @@ export class MyModel {
 
 ```
 
+### Modelizing an external type
+
+If you want the serializers to be able to support types that are not under your control, we provide a utility function to let you "modelize" it.
+Here is an example:
+
+```typescript
+import { Modelize, NumberMember, Float32 } from '@uon/model';
+import { Vec2 } from 'some-math-lib';
+
+Modelize(Vec2, {
+    x: NumberMember(Float32),
+    y: NumberMember(Float32)
+});
+
+```
+
 ### Serialization
 
-To serialize a model instance:
+To serialize a model instance you can either do it manually via the JsonSerializer interface or simply pass it to JSON.stringify().
 
 ```typescript
 let obj = new MyModel();
 let serializer = new JsonSerializer(MyModel);
-let serialized_str = JSON.stringify(serializer.serialize(obj));
+let serialized = serializer.serialize(obj);
 ```
-Note that serializer.serialize does not return a JSON string but rather a JSON object using only builtin types (String, Number, Boolean, Array, Object and Date).
+Note that serializer.serialize does not return a string but rather a JSON object using only builtin types (String, Number, Boolean, Array, Object and Date).
 
-### Deserialization
 To deserialize, we do the following:
 ```typescript
 let serializer = new JsonSerializer(MyModel);

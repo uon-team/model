@@ -1,7 +1,6 @@
 import { Type, GetTypeMetadata, GLOBAL } from "@uon/core";
-import { Model } from "./Model";
 import { Member } from "./Member";
-
+import { MODEL_DECORATOR_NAME, MEMBER_DECORATOR_NAME } from "./Common";
 
 declare function atob(str: string): string;
 declare function btoa(str: string): string;
@@ -10,11 +9,11 @@ declare function btoa(str: string): string;
  * Given a type, find a @Model annotation
  * @param annotations 
  */
-export function FindModelAnnotation<T>(type: Type<T>): Model {
+export function FindModelAnnotation<T>(type: Type<T>): any {
 
     const annotations = GetTypeMetadata(type);
     for (let i = 0, l = annotations.length; i < l; ++i) {
-        if (annotations[i] instanceof Model) {
+        if (annotations[i].decoratorName === MODEL_DECORATOR_NAME) {
             return annotations[i];
         }
     }
@@ -27,7 +26,7 @@ export function FindModelAnnotation<T>(type: Type<T>): Model {
  * Get all @Member property annotations for a given Model metadata
  * @param model 
  */
-export function GetModelMembers(model: Model): Member[] {
+export function GetModelMembers(model: any): Member[] {
 
     const annotations = model.properties;
     const members_meta: Member[] = [];

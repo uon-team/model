@@ -7,6 +7,8 @@ import {
     GetTypeMetadata
 } from '@uon/core'
 import { Validator } from './Validate';
+import { MEMBER_DECORATOR_NAME, ID_DECORATOR_NAME } from './Common';
+
 
 
 /**
@@ -63,8 +65,8 @@ export interface MemberOptions {
 
 }
 
-export const Member: MemberDecorator = MakeUnique(`@uon/model/Member`,
-    MakePropertyDecorator("Member",
+export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
+    MakePropertyDecorator(MEMBER_DECORATOR_NAME,
         (options?: MemberOptions) => options,
         null,
         (target: any, meta: Member, key: string) => {
@@ -80,7 +82,7 @@ export const Member: MemberDecorator = MakeUnique(`@uon/model/Member`,
 
             meta.key = key;
             meta.type = type;
-            meta.model = annotations.find(a => a.decoratorName === 'Model');
+            meta.model = annotations.find(a => a.decoratorName === '@uon/model/Model');
 
         }));
 
@@ -102,8 +104,8 @@ export interface ID extends Member {
 }
 
 
-export const ID: IDDecorator = MakeUnique(`@uon/model/ID`,
-    MakePropertyDecorator("ID",
+export const ID: IDDecorator = MakeUnique(ID_DECORATOR_NAME,
+    MakePropertyDecorator(ID_DECORATOR_NAME,
         (key: string, type: Type<any>) => ({ key, type }),
         Member,
         (target, meta: ID, key: string) => {

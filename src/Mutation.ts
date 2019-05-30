@@ -25,6 +25,11 @@ export function ClearMutations<T>(obj: T) {
     });
 }
 
+export function GetMutations<T>(obj: T) {
+    return GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, obj as any) as Mutations<T>;
+}
+
+
 
 /**
  * 

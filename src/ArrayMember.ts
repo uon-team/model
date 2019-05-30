@@ -1,6 +1,7 @@
 import { Type, MakeUnique, MakePropertyDecorator, GetMetadata } from "@uon/core";
 import { Member } from "./Member";
 import { NumberType, TypedNumber } from "./NumberMember";
+import { ARRAY_MEMBER_DECORATOR_NAME } from "./Common";
 
 /**
  * ArrayMemberDecorator interface makes tsc happy
@@ -18,8 +19,8 @@ export interface ArrayMember {
     type?: Type<any> | TypedNumber;
 }
 
-export const ArrayMember: ArrayMemberDecorator = MakeUnique(`@uon/model/ArrayMember`,
-    MakePropertyDecorator("ArrayMember",
+export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORATOR_NAME,
+    MakePropertyDecorator(ARRAY_MEMBER_DECORATOR_NAME,
         (elementType: Type<any> | TypedNumber) => ({ type: elementType }),
         Member,
         (target: any, meta: ArrayMember, key: string) => {

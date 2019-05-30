@@ -4,7 +4,7 @@ import { Member, ID } from '../Member';
 import { TypedNumber, NumberMember } from '../NumberMember';
 import { ArrayMember } from '../ArrayMember';
 import { FindModelAnnotation, GetModelMembers, IsTypedArrayType } from '../Utils';
-import { ClearMutations } from '../Mutation';
+import { ClearMutations, GetMutations } from '../Mutation';
 
 const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/json/impl-cache`,
     new Map<Type<any>, JsonSerializerImpl<any>>());
@@ -19,15 +19,24 @@ class JsonSerializerImpl<T> {
 
     }
 
-    serialize(obj: T): object {
+    serialize(obj: T, mutationsOnly: boolean = false): object {
 
-        const stack = this._serializeStack;
+        const mutations = GetMutations(obj);
+        let stack = this._serializeStack;
         const result: any = {};
+
+        if(mutationsOnly) {
+            stack = {};
+            for (let key in mutations) {
+                stack[key] = this._serializeStack[key];
+            }
+        }
+        
         for (let key in stack) {
 
             let val = (obj as any)[key];
 
-            // only call func if not null or undefined
+            // only call func if not undefined
             if (val !== undefined) {
                 // we treat null as a valid value here, we just don't pass it thru 
                 // the serialization function
@@ -55,8 +64,6 @@ class JsonSerializerImpl<T> {
                 val = val !== null ? stack[key](val) : null;
                 result[key] = val;
             }
-
-
         }
 
         // clear dirty fields as this is a brand new instance
@@ -123,19 +130,11 @@ export class JsonSerializer<T> {
 
     /**
      * Serialize a modeled value to a plain js object
-     * @param val 
+     * @param val
+     * @param mutationsOnly 
      */
-    serialize(val: T): object {
-
-        return this._impl.serialize(val);
-    }
-
-    /**
-     * Shortcut for serializing array
-     * @param val 
-     */
-    serializeAll(val: T[]): object[] {
-        return val.map(t => this._impl.serialize(t));
+    serialize(val: T, mutationsOnly: boolean = false): object {
+        return this._impl.serialize(val, mutationsOnly);
     }
 
     /**
@@ -144,16 +143,7 @@ export class JsonSerializer<T> {
      * @param val 
      */
     deserialize(val: object): T {
-
         return this._impl.deserialize(val);
-    }
-
-    /**
-     * Shorcut for deserializing array
-     * @param val 
-     */
-    deserializeAll(val: object[]): T[] {
-        return val.map(t => this._impl.deserialize(t));
     }
 
 

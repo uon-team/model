@@ -5,7 +5,7 @@ import { ArrayMember } from './ArrayMember';
 import { Mutations, MUTATIONS_WEAPMAP, GetOrDefineInWeakMap } from './Mutation';
 import { JsonSerializer } from './serializers/JsonSerializer';
 import { Validator } from './Validate';
-
+import { MODEL_DECORATOR_NAME } from './Common';
 
 
 // a weakmap to keep data
@@ -40,11 +40,12 @@ export interface ModelOptions {
 }
 
 
+
 /**
  * 
  */
-export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
-    MakeTypeDecorator("Model",
+export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
+    MakeTypeDecorator(MODEL_DECORATOR_NAME,
         () => ({}),
         null,
         (target: Type<any>, meta: Model) => {
@@ -97,7 +98,7 @@ export const Model: ModelDecorator = MakeUnique(`@uon/model/Model`,
 
             }
 
-
+            // Define a toJSON method to simplify serialization when using JSON.stringify
             target.prototype.toJSON = function () {
                 const serializer = new JsonSerializer(target);
                 return serializer.serialize(this);

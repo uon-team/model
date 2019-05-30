@@ -6,6 +6,7 @@ import {
     MakeUnique
 } from '@uon/core'
 import { Member } from './Member';
+import { NUMBER_MEMBER_DECORATOR_NAME } from './Common';
 
 
 
@@ -53,8 +54,8 @@ export interface NumberMember {
     type: NumberType;
 }
 
-export const NumberMember: NumberMemberDecorator = MakeUnique(`@uon/model/NumberMember`,
-    MakePropertyDecorator("NumberMember",
+export const NumberMember: NumberMemberDecorator = MakeUnique(NUMBER_MEMBER_DECORATOR_NAME,
+    MakePropertyDecorator(NUMBER_MEMBER_DECORATOR_NAME,
         (type: NumberType) => ({ type }),
         Member,
         (target: any, meta: NumberMember, key: string) => {
