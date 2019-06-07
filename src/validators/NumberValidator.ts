@@ -1,9 +1,9 @@
 
 
-import { ValidationFailure } from '../Validate';
+import { ValidationFailure, Validator } from '../Validate';
 
 
-export function ValidateRange(min: number, max: number) {
+export function ValidateRange(min: number, max: number): Validator {
 
     return function (model: any, key: string, val: number) {
 

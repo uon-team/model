@@ -1,9 +1,9 @@
 
-import { Type } from '@uon/core';
+import { Type, Injector } from '@uon/core';
 import { FindModelAnnotation, GetModelMembers } from './Utils';
 
 
-export type Validator = (model: any, key: string, val: any) => any;
+export type Validator = (model: any, key: string, val: any, injector?: Injector) => any;
 
 
 /**
@@ -38,7 +38,13 @@ export class ValidationFailure {
     }
 }
 
-export async function Validate<T>(target: T, extraValidators: { [k: string]: Validator[] } = {}): Promise<ValidationResult<T>> {
+/**
+ * Validate a model
+ * @param target the model instance to validate
+ * @param extraValidators a map of extra validator to run
+ * @param injector An optional injector to pass to each validators, some validators will require that you pass this
+ */
+export async function Validate<T>(target: T, extraValidators: { [k: string]: Validator[] } = {}, injector: Injector = null): Promise<ValidationResult<T>> {
 
     // grab type
     const type = target.constructor as Type<T>;
@@ -75,7 +81,7 @@ export async function Validate<T>(target: T, extraValidators: { [k: string]: Val
             }
 
             try {
-                await v[j](target, key, value)
+                await v[j](target, key, value, injector)
             }
             catch (err) {
 

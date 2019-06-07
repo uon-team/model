@@ -1,11 +1,11 @@
 
-import { ValidationFailure } from '../Validate';
+import { ValidationFailure, Validator } from '../Validate';
 
 
 
 const EMAIL_REGEXP = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i
 
-export function ValidateEmail() {
+export function ValidateEmail(): Validator {
 
     return function (model: any, key: string, val: string) {
 
