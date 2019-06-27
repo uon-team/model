@@ -2,7 +2,7 @@
 import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
 import { Member, ID } from './Member';
 import { ArrayMember } from './ArrayMember';
-import { Mutations, MUTATIONS_WEAPMAP, GetOrDefineInWeakMap } from './Mutation';
+import { Mutations, MUTATIONS_WEAPMAP, GetOrDefineInWeakMap, ClearMutations, GetMutations } from './Mutation';
 import { JsonSerializer } from './serializers/JsonSerializer';
 import { Validator } from './Validate';
 import { MODEL_DECORATOR_NAME } from './Common';
@@ -19,7 +19,7 @@ export interface ModelDecorator {
      * Clear all mutation flags from a model instance
      * @param obj 
      */
-    MakeClean<T>(obj: T): void;
+    MakeClean<T>(obj: T, fields?: string[]): void;
 
     /**
      * Get a list of mutations since last cleanup from a model instance
@@ -88,7 +88,7 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
 
                     }
 
-                    if(m.validators) {
+                    if (m.validators) {
                         meta.validators[m.key] = m.validators;
                     }
 
@@ -120,21 +120,10 @@ export interface Model {
 }
 
 // MakeClean implementation
-Model.MakeClean = function MakeClean<T>(obj: T): void {
+Model.MakeClean = ClearMutations;
 
-    const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, obj as any);
-    let keys = Object.keys(dirty);
-    keys.forEach((k) => {
-        delete dirty[k];
-    });
-}
-
-// GetDirty implementation
-Model.GetMutations = function GetMutations<T>(obj: T): Mutations<T> {
-    const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, obj as any);
-    return dirty;
-
-}
+// GetMutations implementation
+Model.GetMutations = GetMutations;
 
 
 /**
@@ -181,7 +170,7 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, member: Membe
     // property setter
     const setter = member instanceof ArrayMember
         ? CreateArraySetter(key)
-        : CreateGenericSetter(key);
+        : member instanceof ID ? CreateForeverCleanSetter(key) : CreateGenericSetter(key);
 
     // delete property.
     if (delete target[key]) {
@@ -195,6 +184,17 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, member: Membe
         });
     }
 
+}
+
+
+function CreateForeverCleanSetter(key: string) {
+
+    return function clean_setter(val: any) {
+
+        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
+        // set new value
+        data[key] = val;
+    }
 }
 
 function CreateGenericSetter(key: string) {
