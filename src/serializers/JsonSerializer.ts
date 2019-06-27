@@ -25,13 +25,13 @@ class JsonSerializerImpl<T> {
         let stack = this._serializeStack;
         const result: any = {};
 
-        if(mutationsOnly) {
+        if (mutationsOnly) {
             stack = {};
             for (let key in mutations) {
                 stack[key] = this._serializeStack[key];
             }
         }
-        
+
         for (let key in stack) {
 
             let val = (obj as any)[key];
@@ -50,7 +50,7 @@ class JsonSerializerImpl<T> {
         return result;
     }
 
-    deserialize(obj: object): T {
+    deserialize(obj: object, clearMutations: boolean = true): T {
 
         const stack = this._deserializeStack;
         const result: any = new (this.type as any)();
@@ -67,7 +67,10 @@ class JsonSerializerImpl<T> {
         }
 
         // clear dirty fields as this is a brand new instance
-        ClearMutations(result);
+        if (clearMutations) {
+            ClearMutations(result);
+        }
+
 
         return result as T;
     }
@@ -142,8 +145,8 @@ export class JsonSerializer<T> {
      * @param type 
      * @param val 
      */
-    deserialize(val: object): T {
-        return this._impl.deserialize(val);
+    deserialize(val: object, clearMutations: boolean = true): T {
+        return this._impl.deserialize(val, clearMutations);
     }
 
 
@@ -153,6 +156,7 @@ export class JsonSerializer<T> {
 
 function CreateArrayHandler(handler: (value: any) => any) {
     return function array_handler(val: any[]) {
+        val = Array.isArray(val) ? val : [val]; // convert to array here
         return val.map(handler);
     };
 }
