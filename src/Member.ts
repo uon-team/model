@@ -7,7 +7,7 @@ import {
     GetTypeMetadata
 } from '@uon/core'
 import { Validator } from './Validate';
-import { MEMBER_DECORATOR_NAME, ID_DECORATOR_NAME } from './Common';
+import { MEMBER_DECORATOR_NAME, ID_DECORATOR_NAME, MODEL_DECORATOR_NAME } from './Common';
 
 
 
@@ -49,12 +49,6 @@ export interface MemberOptions {
      */
     validators?: Validator[];
 
-    /**
-     * When set to true, Validate() will return an error if the 
-     * field is null or undefined.
-     * Defaults to false.
-     */
-    required?: boolean;
 
     /**
      * Coerse the incoming value to the target type during deserialization
@@ -82,7 +76,7 @@ export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
 
             meta.key = key;
             meta.type = type;
-            meta.model = annotations.find(a => a.decoratorName === '@uon/model/Model');
+            meta.model = annotations.find(a => a.decoratorName === MODEL_DECORATOR_NAME);
 
         }));
 
