@@ -16,10 +16,10 @@ export type Mutations<T, U = Partial<Pick<T, PropertyNamesNotOfType<T, Function>
 export const MUTATIONS_WEAPMAP = MakeUnique('@uon/model/mutation/map', new WeakMap<object, { [k: string]: boolean }>());
 
 
-export function ClearMutations<T>(obj: T) {
+export function ClearMutations<T>(obj: T, fields?: string[]) {
 
     const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, obj as any);
-    let keys = Object.keys(dirty);
+    let keys = fields || Object.keys(dirty);
     keys.forEach((k) => {
         delete dirty[k];
     });
