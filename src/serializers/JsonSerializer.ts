@@ -157,7 +157,7 @@ export class JsonSerializer<T> {
 function CreateArrayHandler(handler: (value: any) => any) {
     return function array_handler(val: any[]) {
         val = Array.isArray(val) ? val : [val]; // convert to array here
-        return val.map(handler);
+        return val.map((v) => { return handler(v) });
     };
 }
 
