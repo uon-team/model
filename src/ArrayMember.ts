@@ -1,14 +1,15 @@
 import { Type, MakeUnique, MakePropertyDecorator, GetMetadata } from "@uon/core";
-import { Member } from "./Member";
+import { Member, MemberOptions } from "./Member";
 import { NumberType, TypedNumber } from "./NumberMember";
 import { ARRAY_MEMBER_DECORATOR_NAME } from "./Common";
+import { Validator } from "./Validate";
 
 /**
  * ArrayMemberDecorator interface makes tsc happy
  */
 export interface ArrayMemberDecorator {
-    (elementType: Type<any> | TypedNumber): PropertyDecorator;
-    new(elementType: Type<any> | TypedNumber): ArrayMember;
+    (elementType: Type<any> | TypedNumber, options?: ArrayMemberOptions): PropertyDecorator;
+    new(elementType: Type<any> | TypedNumber, options?: ArrayMemberOptions): ArrayMember;
 }
 
 /**
@@ -19,9 +20,20 @@ export interface ArrayMember {
     type?: Type<any> | TypedNumber;
 }
 
+
+export interface ArrayMemberOptions extends MemberOptions {
+
+    /**
+     * If the value set is not an array
+     */
+    elementValidators?: Validator[];
+
+
+}
+
 export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORATOR_NAME,
     MakePropertyDecorator(ARRAY_MEMBER_DECORATOR_NAME,
-        (elementType: Type<any> | TypedNumber) => ({ type: elementType }),
+        (elementType: Type<any> | TypedNumber, options?: ArrayMemberOptions) => ({ type: elementType, ...options }),
         Member,
         (target: any, meta: ArrayMember, key: string) => {
 
@@ -30,7 +42,7 @@ export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORAT
 
             // can only use ArrayMember decorator on array members
             if (type && type != Array) {
-                throw new Error("You can only use ArrayMember on array members.");
+                throw new Error("You can only use ArrayMember on members of type Array.");
             }
 
             meta.key = key;
