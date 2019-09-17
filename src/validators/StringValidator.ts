@@ -2,6 +2,10 @@
 import { ValidationFailure } from '../Validate';
 
 
+/**
+ * Creates a validator that will test the provided regex
+ * @param pattern 
+ */
 export function ValidatePattern(pattern: RegExp) {
 
     return function (model: any, key: string, val: string) {
@@ -15,6 +19,10 @@ export function ValidatePattern(pattern: RegExp) {
     }
 }
 
+/**
+ * Creates a validator that will test that a string value is at least the provided length 
+ * @param min 
+ */
 export function MinLength(min: number) {
 
     return function (model: any, key: string, val: string | any[]) {
@@ -30,6 +38,10 @@ export function MinLength(min: number) {
     }
 }
 
+/**
+ * Creates a validator that will test that a string value is at maximum the provided length 
+ * @param max 
+ */
 export function MaxLength(max: number) {
 
     return function (model: any, key: string, val: string | any[]) {
