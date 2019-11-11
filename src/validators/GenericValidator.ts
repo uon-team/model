@@ -3,6 +3,10 @@
 import { ValidationFailure, Validator } from '../Validate';
 
 
+/**
+ * Creates a validator that check if the value 
+ * is not null nor undefined
+ */
 export function Required(): Validator {
 
     const func = function required(model: any, key: string, val: any) {
@@ -21,6 +25,10 @@ export function Required(): Validator {
 
 }
 
+/**
+ * Creates a validator that prohibits a field of having 
+ * any value other than null or undefined
+ */
 export function Prohibited(): Validator {
 
     const func = function prohibited(model: any, key: string, val: any) {

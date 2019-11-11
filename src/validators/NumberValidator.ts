@@ -3,6 +3,11 @@
 import { ValidationFailure, Validator } from '../Validate';
 
 
+/**
+ * Create a number range validator
+ * @param min Minimum value to compare against, can be null to omit check
+ * @param max Maximum value to compare against, can be null to omit check
+ */
 export function ValidateRange(min: number, max: number): Validator {
 
     return function (model: any, key: string, val: number) {

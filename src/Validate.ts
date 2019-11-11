@@ -11,8 +11,12 @@ export type Validator = (model: any, key: string, val: any, injector?: Injector)
  */
 export class ValidationResult<T> {
 
-    constructor(private _target: T, private _failures: ValidationFailure[]) {
+    constructor(private _target: T, private _failures: ValidationFailure[], private _index: number) {
 
+    }
+
+    get index() {
+        return this._index;
     }
 
     get valid() {
@@ -44,7 +48,10 @@ export class ValidationFailure {
  * @param extraValidators a map of extra validator to run
  * @param injector An optional injector to pass to each validators, some validators will require that you pass this
  */
-export async function Validate<T>(target: T, extraValidators: { [k: string]: Validator[] } = {}, injector: Injector = null): Promise<ValidationResult<T>> {
+export async function Validate<T>(target: T,
+    extraValidators: { [k: string]: Validator[] } = {},
+    injector: Injector = null,
+    _index: number = 0): Promise<ValidationResult<T>> {
 
     // grab type
     const type = target.constructor as Type<T>;
@@ -81,7 +88,12 @@ export async function Validate<T>(target: T, extraValidators: { [k: string]: Val
             }
 
             try {
-                await v[j](target, key, value, injector)
+                let result = await v[j](target, key, value, injector);
+
+                // assign resulting value? 
+                // This would treat validators as formatters, not sure
+
+
             }
             catch (err) {
 
@@ -98,7 +110,7 @@ export async function Validate<T>(target: T, extraValidators: { [k: string]: Val
     }
 
 
-    return new ValidationResult(target, failures);
+    return new ValidationResult(target, failures, _index);
 
 
 }
