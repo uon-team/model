@@ -75,7 +75,7 @@ export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
             }
 
             meta.key = key;
-            meta.type = type;
+            meta.type = meta.type || type;
             meta.model = annotations.find(a => a.decoratorName === MODEL_DECORATOR_NAME);
 
         }));
