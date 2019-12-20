@@ -1,6 +1,7 @@
 
 import { ValidationFailure } from '../Validate';
 
+const MONGO_ID_REGEX = /^[a-fA-F0-9]{24}$/;
 
 /**
  * Creates a validator that will test the provided regex
@@ -12,6 +13,22 @@ export function ValidatePattern(pattern: RegExp) {
 
         if (!pattern.test(val)) {
             throw new ValidationFailure(ValidatePattern, key, val, `"${val}" does not match pattern ${pattern.toString()}`);
+        }
+
+        return val;
+
+    }
+}
+
+/**
+ * Creates a validator that will test for a native mongo id
+ */
+export function ValidateMongoId() {
+
+    return function (model: any, key: string, val: string) {
+
+        if (val && val.match(MONGO_ID_REGEX) !== null) {
+            throw new ValidationFailure(ValidateMongoId, key, val, `"${val}" does not match pattern ${MONGO_ID_REGEX.toString()}`);
         }
 
         return val;
