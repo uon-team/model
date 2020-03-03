@@ -2,10 +2,10 @@
 import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
 import { Member, ID } from './Member';
 import { ArrayMember } from './ArrayMember';
-import { Mutations, MUTATIONS_WEAPMAP, GetOrDefineInWeakMap, ClearMutations, GetMutations } from './Mutation';
+import { Mutations, ClearMutations, GetMutations } from './Mutation';
 import { JsonSerializer } from './serializers/JsonSerializer';
 import { Validator } from './Validate';
-import { MODEL_DECORATOR_NAME } from './Common';
+import { MODEL_DECORATOR_NAME, GetOrSet, DATA_SYMBOL, MUT_SYMBOL } from './Common';
 
 
 // a weakmap to keep data
@@ -78,14 +78,10 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
 
                     // check if this is an ID
                     if (m instanceof ID) {
-
-                        // ID already set, this is a user error
                         if (meta.id) {
-                            throw new Error(`Model: ${target.name} has more then 1 ID() decorator.`);
+                            throw new Error(`${target.name} cannot have more than 1 ID decorator.`);
                         }
-
                         meta.id = m;
-
                     }
 
                     if (m.validators) {
@@ -163,14 +159,16 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, member: Membe
 
     // property getter
     const getter = function () {
-        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
+        const data = GetOrSet(this, DATA_SYMBOL);
         return data[key];
     };
 
     // property setter
     const setter = member instanceof ArrayMember
         ? CreateArraySetter(key)
-        : member instanceof ID ? CreateForeverCleanSetter(key) : CreateGenericSetter(key);
+        : member instanceof ID
+            ? CreateForeverCleanSetter(key)
+            : CreateGenericSetter(key);
 
     // delete property.
     if (delete target[key]) {
@@ -190,10 +188,7 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, member: Membe
 function CreateForeverCleanSetter(key: string) {
 
     return function clean_setter(val: any) {
-
-        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
-        // set new value
-        data[key] = val;
+        GetOrSet(this, DATA_SYMBOL)[key] = val;
     }
 }
 
@@ -201,14 +196,15 @@ function CreateGenericSetter(key: string) {
 
     return function generic_setter(val: any) {
 
-        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
-        const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, this);
+        const data = GetOrSet(this, DATA_SYMBOL);
+        const dirty = GetOrSet(this, MUT_SYMBOL);
 
-        // set field as dirty
-        dirty[key] = true;
+        // only if value has changed
+        if (data[key] !== val) {
+            dirty[key] = true;
+            data[key] = val;
+        }
 
-        // set new value
-        data[key] = val;
     }
 }
 
@@ -216,8 +212,8 @@ function CreateArraySetter(key: string) {
 
     return function array_setter(val: any) {
 
-        const data = GetOrDefineInWeakMap(DATA_WEAKMAP, this);
-        const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, this);
+        const data = GetOrSet(this, DATA_SYMBOL);
+        const dirty = GetOrSet(this, MUT_SYMBOL);
 
         if (val) {
             val = new Proxy(val, GetArrayProxyHandler(this, key));
@@ -241,7 +237,7 @@ const ARRAY_MUTATION_FUNC_NAMES = ['push', 'unshift', 'pop', 'shift', 'splice'];
  */
 function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
 
-    const dirty = GetOrDefineInWeakMap(MUTATIONS_WEAPMAP, inst);
+    const dirty = GetOrSet(inst, MUT_SYMBOL);
 
     return {
         get(target, prop) {

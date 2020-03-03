@@ -1,4 +1,4 @@
-import { Type, MakeUnique, StringUtils } from "@uon/core";
+import { Type, MakeUnique } from "@uon/core";
 import { FindModelAnnotation, GetModelMembers, Utf8ToBase64, Base64ToUtf8 } from "../Utils";
 import { Member } from "../Member";
 import { ArrayMember } from "../ArrayMember";
@@ -10,12 +10,15 @@ const UINT8_ARRAY_SERIALIZER = CreateArraySerializeHandler(GetSerializeHandler(U
 const UINT8_ARRAY_DESERIALIZER = CreateArrayDeserializeHandler(GetDeserializeHandler(Uint8));
 
 
+const UNDEFINED_ARRAY_BUFFER = new Uint8Array([0xC0, 0x80]);
+const NULL_ARRAY_BUFFER = new Uint8Array([0]);
+
+
 const BINARY_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/binary/impl-cache`,
     new Map<Type<any>, BinarySerializerImpl<any>>());
 
 class BinarySerializerImpl<T> {
 
-    private _hashCode: number;
     private _members: Member[];
     private _keys: string[];
 
@@ -108,9 +111,6 @@ class BinarySerializerImpl<T> {
         const keys = this._keys = members_meta.map((m) => {
             return m.key;
         });
-
-        this._hashCode = StringUtils.hash(keys.join(' '));
-
 
         // go over each member meta and create grab it's type serialization function
         for (let i = 0, l = members_meta.length; i < l; ++i) {
