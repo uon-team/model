@@ -1,6 +1,6 @@
 import { MakeUnique, Include, PropertyNamesNotOfType } from "@uon/core";
-import { GetOrSet, MUT_SYMBOL } from "./Common";
-
+import { GetOrSet } from "../utils/getset";
+import { MUT_SYMBOL } from "./constants";
 
 export interface ArrayMutation {
     op: 'push' | 'pop' | 'splice' | 'shift' | 'unshift' | 'set';

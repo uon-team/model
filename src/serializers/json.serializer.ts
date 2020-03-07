@@ -1,10 +1,9 @@
 
 import { Type, GetTypeMetadata, MakeUnique } from '@uon/core';
-import { Member, ID } from '../Member';
-import { TypedNumber, NumberMember } from '../NumberMember';
-import { ArrayMember } from '../ArrayMember';
-import { FindModelAnnotation, GetModelMembers, IsTypedArrayType } from '../Utils';
-import { ClearMutations, GetMutations } from '../Mutation';
+import { Member, ID } from '../meta/member.decorator';
+import { ArrayMember } from '../meta/array.decorator';
+import { FindModelAnnotation, GetModelMembers } from '../utils/model.utils';
+import { ClearMutations, GetMutations } from '../base/mutation';
 
 const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/json/impl-cache`,
     new Map<Type<any>, JsonSerializerImpl<any>>());

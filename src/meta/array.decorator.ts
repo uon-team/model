@@ -1,8 +1,8 @@
 import { Type, MakeUnique, MakePropertyDecorator, GetMetadata } from "@uon/core";
-import { Member, MemberOptions } from "./Member";
-import { NumberType, TypedNumber } from "./NumberMember";
-import { ARRAY_MEMBER_DECORATOR_NAME } from "./Common";
-import { Validator } from "./Validate";
+import { Member, MemberOptions } from "./member.decorator";
+import { Validator } from "../base/validation";
+import { TypedNumber } from "../base/number.type";
+import { ARRAY_MEMBER_DECORATOR_NAME } from "src/base/constants";
 
 /**
  * ArrayMemberDecorator interface makes tsc happy

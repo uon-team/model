@@ -1,5 +1,5 @@
 
-import { ValidationFailure, Validator } from '../Validate';
+import { ValidationFailure, Validator } from '../base/validation';
 
 
 

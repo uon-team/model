@@ -1,13 +1,4 @@
-
-import {
-    Type,
-    GetMetadata,
-    MakePropertyDecorator,
-    MakeUnique
-} from '@uon/core'
-import { Member } from './Member';
-import { NUMBER_MEMBER_DECORATOR_NAME } from './Common';
-
+import { MakeUnique } from "@uon/core";
 
 
 export class TypedNumber {
@@ -39,34 +30,3 @@ export const Float32 =  MakeUnique(`@uon/model/Float32`, new TypedNumber('Float3
 export const Float64 =  MakeUnique(`@uon/model/Float64`, new TypedNumber('Float64', 8));
 
 export type NumberType = Int8 | Int16 | Int32 | Int64 | Uint8 | Uint16 | Uint32 | Uint64 | Float32 | Float64;
-
-
-export interface NumberMemberDecorator {
-    (type: NumberType): PropertyDecorator;
-    new(type: NumberType): NumberType
-}
-
-/**
- * The metadata for a model's serializable field
- */
-export interface NumberMember {
-    key: string;
-    type: NumberType;
-}
-
-export const NumberMember: NumberMemberDecorator = MakeUnique(NUMBER_MEMBER_DECORATOR_NAME,
-    MakePropertyDecorator(NUMBER_MEMBER_DECORATOR_NAME,
-        (type: NumberType) => ({ type }),
-        Member,
-        (target: any, meta: NumberMember, key: string) => {
-
-            // get the field type 
-            let type: Type<any> = GetMetadata('design:type', target, key);
-
-            if (type && type != Number) {
-                throw new Error(`NumberType decorator can only be declared on property with type Number`);
-            }
-
-            meta.key = key;
-
-        }));

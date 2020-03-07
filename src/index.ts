@@ -1,23 +1,31 @@
 /*! *******************************************************************************
 @uon/model
-Copyright (C) 2018 Gabriel Roy <g@uon.io>
+Copyright (C) 2020 Gabriel Roy <g@uon.io>
 MIT Licensed
 ********************************************************************************* */
 
-export * from './Model';
-export * from './Member';
-export * from './NumberMember';
-export * from './ArrayMember';
 
-export * from './Utils';
 
-export * from './Validate';
+export * from './base/validation';
+export * from './base/number.type';
 
-export * from './validators/NumberValidator';
-export * from './validators/StringValidator';
-export * from './validators/EmailValidator';
-export * from './validators/GenericValidator';
-export * from './validators/ModelValidator';
+export * from './meta/model.decorator';
+export * from './meta/member.decorator';
+export * from './meta/number.decorator';
+export * from './meta/array.decorator';
 
-export * from './serializers/JsonSerializer';
-export * from './serializers/BinarySerializer';
+export * from './validators/number.validator';
+export * from './validators/string.validator';
+export * from './validators/email.validator';
+export * from './validators/required.validator';
+export * from './validators/prohibited.validator';
+export * from './validators/model.validator';
+export * from './validators/phone.validator';
+
+export * from './utils/model.utils';
+export * from './utils/base64';
+
+export * from './serializers/json.serializer';
+export * from './serializers/binary.serializer';
+
+

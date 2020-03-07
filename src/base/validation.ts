@@ -1,6 +1,6 @@
 
 import { Type, Injector } from '@uon/core';
-import { FindModelAnnotation, GetModelMembers } from './Utils';
+import { FindModelAnnotation } from '../utils/model.utils';
 
 
 export type Validator = (model: any, key: string, val: any, injector?: Injector) => any;

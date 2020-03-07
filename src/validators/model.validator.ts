@@ -1,5 +1,5 @@
 
-import { ValidationFailure, Validator, Validate } from '../Validate';
+import { ValidationFailure, Validator, Validate } from '../base/validation';
 import { Type, Injector } from '@uon/core';
 
 /**

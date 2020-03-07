@@ -1,8 +1,9 @@
 import { Type, MakeUnique } from "@uon/core";
-import { FindModelAnnotation, GetModelMembers, Utf8ToBase64, Base64ToUtf8 } from "../Utils";
-import { Member } from "../Member";
-import { ArrayMember } from "../ArrayMember";
-import { TypedNumber, Int8, Int16, Int32, Uint8, Uint16, Uint32, Float32, Float64 } from "../NumberMember";
+import { FindModelAnnotation, GetModelMembers } from "../utils/model.utils";
+import { Utf8ToBase64, Base64ToUtf8 } from "../utils/base64";
+import { Member } from "../meta/member.decorator";
+import { ArrayMember } from "../meta/array.decorator";
+import { Int8, Int16, Int32, Uint8, Uint16, Uint32, Float32, Float64 } from "../base/number.type";
 
 
 

@@ -1,11 +1,11 @@
-import { Type, GetTypeMetadata, GLOBAL } from "@uon/core";
-import { Member } from "./Member";
-import { MODEL_DECORATOR_NAME, MEMBER_DECORATOR_NAME } from "./Common";
 
-declare function atob(str: string): string;
-declare function btoa(str: string): string;
+import { GetTypeMetadata, Type } from "@uon/core"
+import { Member } from "../meta/member.decorator"
+import { Model } from "../meta/model.decorator"
+import { MODEL_DECORATOR_NAME } from "../base/constants"
 
-/**
+
+/*
  * Given a type, find a @Model annotation
  * @param annotations 
  */
@@ -26,7 +26,7 @@ export function FindModelAnnotation<T>(type: Type<T>): any {
  * Get all @Member property annotations for a given Model metadata
  * @param model 
  */
-export function GetModelMembers(model: any): Member[] {
+export function GetModelMembers(model: Model): Member[] {
 
     const annotations = model.properties;
     const members_meta: Member[] = [];
@@ -59,47 +59,3 @@ function ExtractMetaFromArray(arr: any[], type: any) {
 
     return null;
 }
-
-
-
-declare var Buffer: any;
-
-
-export function Utf8ToBase64(str: string): string {
-    if (GLOBAL.atob) {
-        return atob(str);
-    }
-    else {
-        return Buffer.from(str, 'utf8').toString('base64');
-    }
-}
-
-
-export function Base64ToUtf8(str: string): string {
-    if (GLOBAL.atob) {
-        return btoa(str);
-    }
-    else {
-        return Buffer.from(str, 'base64').toString('utf8');
-    }
-}
-
-const TYPED_ARRAY_TYPES = [
-    Int8Array,
-    Uint8Array,
-    Uint8ClampedArray,
-    Int16Array,
-    Uint16Array,
-    Int32Array,
-    Uint32Array,
-    Float32Array,
-    Float64Array
-];
-
-export function IsTypedArrayType(type: any) {
-
-    return TYPED_ARRAY_TYPES.indexOf(type) > -1;
-
-}
-
-

@@ -1,5 +1,5 @@
 
-import { ValidationFailure } from '../Validate';
+import { ValidationFailure } from '../base/validation';
 
 const MONGO_ID_REGEX = /^[a-fA-F0-9]{24}$/;
 

@@ -1,15 +1,13 @@
 
 import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
-import { Member, ID } from './Member';
-import { ArrayMember } from './ArrayMember';
-import { Mutations, ClearMutations, GetMutations } from './Mutation';
-import { JsonSerializer } from './serializers/JsonSerializer';
-import { Validator } from './Validate';
-import { MODEL_DECORATOR_NAME, GetOrSet, DATA_SYMBOL, MUT_SYMBOL } from './Common';
+import { Member, ID } from './member.decorator';
+import { ArrayMember } from './array.decorator';
+import { Mutations, ClearMutations, GetMutations } from '../base/mutation';
+import { JsonSerializer } from '../serializers/json.serializer';
+import { Validator } from '../base/validation';
+import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from 'src/base/constants';
+import { GetOrSet } from '../utils/getset';
 
-
-// a weakmap to keep data
-const DATA_WEAKMAP: WeakMap<object, any> = new WeakMap<object, any>();
 
 export interface ModelDecorator {
     (options?: ModelOptions): TypeDecorator;
