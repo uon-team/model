@@ -7,7 +7,7 @@ import {
     GetTypeMetadata
 } from '@uon/core'
 import { Validator } from '../base/validation';
-import { MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME, ID_DECORATOR_NAME } from 'src/base/constants';
+import { MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME, ID_DECORATOR_NAME } from '../base/constants';
 
 /**
  * MemberDecorator interface makes tsc happy

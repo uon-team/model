@@ -1,4 +1,4 @@
-import { Validator, ValidationFailure } from "src/base/validation";
+import { Validator, ValidationFailure } from "../base/validation";
 
 
 

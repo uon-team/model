@@ -5,7 +5,7 @@ import { ArrayMember } from './array.decorator';
 import { Mutations, ClearMutations, GetMutations } from '../base/mutation';
 import { JsonSerializer } from '../serializers/json.serializer';
 import { Validator } from '../base/validation';
-import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from 'src/base/constants';
+import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from '../base/constants';
 import { GetOrSet } from '../utils/getset';
 
 
