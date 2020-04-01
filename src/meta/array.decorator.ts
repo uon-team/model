@@ -1,8 +1,8 @@
-import { Type, MakeUnique, MakePropertyDecorator, GetMetadata } from "@uon/core";
-import { Member, MemberOptions } from "./member.decorator";
+import { Type, MakeUnique, MakePropertyDecorator, GetMetadata, GetTypeMetadata } from "@uon/core";
+import { Member, MemberOptions, ID } from "./member.decorator";
 import { Validator } from "../base/validation";
 import { TypedNumber } from "../base/number.type";
-import { ARRAY_MEMBER_DECORATOR_NAME } from "../base/constants";
+import { ARRAY_MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME } from "../base/constants";
 
 /**
  * ArrayMemberDecorator interface makes tsc happy
@@ -18,6 +18,10 @@ export interface ArrayMemberDecorator {
 export interface ArrayMember {
     key: string;
     type?: Type<any> | TypedNumber;
+    /**
+     * if the member is a model, this field will be populated
+     */
+    model?: { id: ID };
 }
 
 
@@ -45,6 +49,9 @@ export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORAT
                 throw new Error("You can only use ArrayMember on members of type Array.");
             }
 
-            meta.key = key;
+            let annotations = GetTypeMetadata(meta.type as Type<any>);
 
+            meta.key = key;
+            meta.model = annotations.find(a => a.decoratorName === MODEL_DECORATOR_NAME);
+            
         }));
