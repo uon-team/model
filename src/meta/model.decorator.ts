@@ -55,14 +55,19 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
             meta.validators = {};
 
             // get property annotations map
-            const properties_meta: any = GetPropertiesMetadata(target.prototype) || {};
-            meta.properties = properties_meta;
+            const own_properties_meta: any = GetPropertiesMetadata(target.prototype) || {};
+            const all_properties_meta = Object.assign({},
+                own_properties_meta,
+                FindParentClassPropDecorators(target, Object.keys(own_properties_meta))
+            );
+
+            meta.properties = all_properties_meta;
 
             // go over all decorated properties
-            for (let name in properties_meta) {
+            for (let name in all_properties_meta) {
 
                 // get member decoration only
-                const filtered: Member[] = properties_meta[name].filter((a: any) => {
+                const filtered: Member[] = all_properties_meta[name].filter((a: any) => {
                     return a instanceof Member;
                 });
 
@@ -87,11 +92,13 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
                     }
 
                     // replace field with getter setter
-                    ReplacePropertyWithGetterSetter(target.prototype, name, m);
+                    if (name in own_properties_meta) {
+                        ReplacePropertyWithGetterSetter(target.prototype, name, m);
+                    }
+
                 }
 
             }
-
 
             const serializer = new JsonSerializer(target);
 
@@ -268,7 +275,7 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
 
             if (dirty[key] !== true) {
                 dirty[key] = dirty[key] || [];
-                dirty[key].push({ op: 'set', args: [prop as number] });
+                dirty[key].push({ op: 'set', args: [prop] });
             }
 
 
@@ -276,5 +283,24 @@ function GetArrayProxyHandler(inst: any, key: string): ProxyHandler<any> {
         }
     };
 }
+
+
+function FindParentClassPropDecorators<T>(type: Type<T>, ignore: string[]) {
+
+    const parent = Object.getPrototypeOf(type.prototype);
+    const props = GetPropertiesMetadata(parent) || {};
+
+    const result: { [k: string]: any[] } = {};
+
+    for (let i in props) {
+        if (ignore.indexOf(i) === -1) {
+            result[i] = props[i];
+        }
+    }
+
+    return result;
+
+}
+
 
 
