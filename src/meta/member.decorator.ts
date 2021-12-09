@@ -64,7 +64,7 @@ export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
         (target: any, meta: Member, key: string) => {
 
             // get the field type 
-            let type: Type<any> = GetMetadata('design:type', target, key);
+            let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
             let annotations = GetTypeMetadata(type);
 
             // ArrayMember must be used for arrays
@@ -103,7 +103,7 @@ export const ID: IDDecorator = MakeUnique(ID_DECORATOR_NAME,
         (target, meta: ID, key: string) => {
 
             // get the field type 
-            let type: Type<any> = GetMetadata('design:type', target, key);
+            let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
 
             meta.key = key;
             meta.type = type;

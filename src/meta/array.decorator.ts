@@ -42,7 +42,7 @@ export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORAT
         (target: any, meta: ArrayMember, key: string) => {
 
             // get the field type 
-            let type: Type<any> = GetMetadata('design:type', target, key);
+            let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
 
             // can only use ArrayMember decorator on array members
             if (type && type != Array) {

@@ -33,7 +33,7 @@ export const NumberMember: NumberMemberDecorator = MakeUnique(NUMBER_MEMBER_DECO
         (target: any, meta: NumberMember, key: string) => {
 
             // get the field type 
-            let type: Type<any> = GetMetadata('design:type', target, key);
+            let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
 
             if (type && type != Number) {
                 throw new Error(`NumberType decorator can only be declared on property with type Number`);
