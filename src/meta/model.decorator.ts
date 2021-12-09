@@ -92,11 +92,13 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
 
             }
 
+
+            const serializer = new JsonSerializer(target);
+
             // Define a toJSON method to simplify serialization when using JSON.stringify
             target.prototype.toJSON = function () {
-                const serializer = new JsonSerializer(target);
                 return serializer.serialize(this);
-            }
+            };
 
             // return the original class target
             return target;

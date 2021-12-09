@@ -55,7 +55,7 @@ export async function Validate<T>(target: T,
 
     // grab type
     const type = target.constructor as Type<T>;
-    const model = FindModelAnnotation(type);
+    const model = type ? FindModelAnnotation(type) : null;
 
     const validators: { [k: string]: Validator[] } = model ? Object.assign({}, model.validators) : {};
 

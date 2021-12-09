@@ -5,8 +5,10 @@ import { ArrayMember } from '../meta/array.decorator';
 import { FindModelAnnotation, GetModelMembers } from '../utils/model.utils';
 import { ClearMutations, GetMutations } from '../base/mutation';
 
-const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/json/impl-cache`,
-    new Map<Type<any>, JsonSerializerImpl<any>>());
+const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(
+    `@uon/model/json/impl-cache`,
+    new Map<Type<any>, JsonSerializerImpl<any>>()
+);
 
 
 class JsonSerializerImpl<T> {
@@ -74,10 +76,10 @@ class JsonSerializerImpl<T> {
         return result as T;
     }
 
-    build() {
+    build(meta: any) {
 
         // grab model metadata
-        const model_meta = FindModelAnnotation(this.type);
+        const model_meta = meta || FindModelAnnotation(this.type);
 
         // needs model decoration to exist
         if (!model_meta) {
@@ -123,11 +125,16 @@ class JsonSerializerImpl<T> {
  */
 export class JsonSerializer<T> {
 
+
+
+    private get impl() {
+        this._impl = GetOrCreateModelSerializerImpl(this._type);
+        return this._impl;
+    }
     private _impl: JsonSerializerImpl<T>;
 
     constructor(private _type: Type<T>) {
 
-        this._impl = GetOrCreateModelSerializerImpl(_type);
     }
 
     /**
@@ -136,7 +143,7 @@ export class JsonSerializer<T> {
      * @param mutationsOnly 
      */
     serialize(val: T, mutationsOnly: boolean = false): object {
-        return this._impl.serialize(val, mutationsOnly);
+        return this.impl.serialize(val, mutationsOnly);
     }
 
     /**
@@ -145,7 +152,7 @@ export class JsonSerializer<T> {
      * @param val 
      */
     deserialize(val: object, clearMutations: boolean = true): T {
-        return this._impl.deserialize(val, clearMutations);
+        return this.impl.deserialize(val, clearMutations);
     }
 
 
@@ -160,14 +167,14 @@ function CreateArrayHandler(handler: (value: any) => any) {
     };
 }
 
-function GetOrCreateModelSerializerImpl<T>(type: Type<T>) {
+function GetOrCreateModelSerializerImpl<T>(type: Type<T>, meta?: any) {
 
     let impl = JSON_SERIALIZER_IMPL_CACHE.get(type);
     if (!impl) {
         impl = new JsonSerializerImpl<T>(type);
         JSON_SERIALIZER_IMPL_CACHE.set(type, impl);
 
-        impl.build();
+        impl.build(meta);
     }
 
     return impl;

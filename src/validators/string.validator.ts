@@ -1,7 +1,7 @@
 
 import { ValidationFailure } from '../base/validation';
 
-const MONGO_ID_REGEX = /^[a-fA-F0-9]{24}$/;
+export const MONGO_ID_REGEX = /^[a-fA-F0-9]{24}$/;
 
 /**
  * Creates a validator that will test the provided regex
@@ -27,7 +27,7 @@ export function ValidateMongoId() {
 
     return function (model: any, key: string, val: string) {
 
-        if (val && val.match(MONGO_ID_REGEX) !== null) {
+        if (val && val.match(MONGO_ID_REGEX) == null) {
             throw new ValidationFailure(ValidateMongoId, key, val, `"${val}" does not match pattern ${MONGO_ID_REGEX.toString()}`);
         }
 
@@ -43,6 +43,10 @@ export function ValidateMongoId() {
 export function MinLength(min: number) {
 
     return function (model: any, key: string, val: string | any[]) {
+
+        if(val === null || val === undefined) {
+            return val;
+        }
 
         let str_len = val.length;
 
@@ -63,6 +67,10 @@ export function MaxLength(max: number) {
 
     return function (model: any, key: string, val: string | any[]) {
 
+        if(val === null || val === undefined) {
+            return val;
+        }
+        
         let str_len = val.length;
 
         if (str_len > max) {

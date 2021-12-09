@@ -1,6 +1,6 @@
 /*! *******************************************************************************
 @uon/model
-Copyright (C) 2020 Gabriel Roy <g@uon.io>
+Copyright (C) 2020 uon-team <g@uon.io>
 MIT Licensed
 ********************************************************************************* */
 
@@ -27,5 +27,3 @@ export * from './utils/base64';
 
 export * from './serializers/json.serializer';
 export * from './serializers/binary.serializer';
-
-

@@ -148,21 +148,24 @@ class BinarySerializerImpl<T> {
  */
 export class BinarySerializer<T> {
 
+    private get impl() {
+        this._impl = GetOrCreateModelSerializerImpl(this._type);
+        return this._impl;
+    }
     private _impl: BinarySerializerImpl<T>;
 
-    constructor(_type: Type<T>) {
-        this._impl = GetOrCreateModelSerializerImpl(_type);
+    constructor(private _type: Type<T>) {
+       
     }
-
 
     serialize(obj: T): ArrayBuffer {
 
-        return this._impl.serialize(obj);
+        return this.impl.serialize(obj);
     }
 
     deserialize(buffer: ArrayBuffer): T {
 
-        return this._impl.deserialize(buffer);
+        return this.impl.deserialize(buffer);
     }
 
 }
