@@ -1,8 +1,8 @@
 
-import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator } from '@uon/core'
+import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator, PropertyNamesNotOfType } from '@uon/core'
 import { Member, ID } from './member.decorator';
 import { ArrayMember } from './array.decorator';
-import { Mutations, ClearMutations, GetMutations } from '../base/mutation';
+import { Mutations, ClearMutations, GetMutations, MakeDirty } from '../base/mutation';
 import { JsonSerializer } from '../serializers/json.serializer';
 import { Validator } from '../base/validation';
 import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from '../base/constants';
@@ -19,11 +19,21 @@ export interface ModelDecorator {
      */
     MakeClean<T>(obj: T, fields?: string[]): void;
 
+    MakeDirty<T>(obj: T, key: keyof T): void;
+
     /**
      * Get a list of mutations since last cleanup from a model instance
      * @param obj 
      */
     GetMutations<T>(obj: T): Mutations<T>;
+
+
+    /**
+     * Helper for instanciating
+     * @param type 
+     * @param data 
+     */
+    New<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>): T;
 
 }
 
@@ -35,6 +45,8 @@ export interface ModelOptions {
     name?: string;
     description?: string;
 
+    [k: string]: any;
+
 }
 
 
@@ -44,7 +56,7 @@ export interface ModelOptions {
  */
 export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
     MakeTypeDecorator(MODEL_DECORATOR_NAME,
-        () => ({}),
+        (options?: ModelOptions) => options,
         null,
         (target: Type<any>, meta: Model) => {
 
@@ -115,7 +127,7 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
 /**
  * Declare a class as a Model to enable validation and typed serialization
  */
-export interface Model {
+export interface Model extends ModelOptions {
     type: Type<any>;
     properties: { [k: string]: any[] };
     validators: { [k: string]: Validator[] };
@@ -125,9 +137,15 @@ export interface Model {
 // MakeClean implementation
 Model.MakeClean = ClearMutations;
 
+Model.MakeDirty = MakeDirty;
+
 // GetMutations implementation
 Model.GetMutations = GetMutations;
 
+// New helper
+Model.New = function _Instanciate<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>) {
+    return Object.assign(new type, data);
+}
 
 /**
  * Apply member decorators to an existing non-decorated class.

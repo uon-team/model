@@ -26,5 +26,11 @@ export function GetMutations<T>(obj: T) {
     return GetOrSet(obj as any, MUT_SYMBOL) as Mutations<T>;
 }
 
+export function MakeDirty<T>(obj: T, key: keyof T) {
+    const dirty = GetOrSet(obj as any, MUT_SYMBOL);
+    dirty[key] = true;
+}
+
+
 
 
