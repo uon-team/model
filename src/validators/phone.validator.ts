@@ -3,7 +3,7 @@ import { ValidationFailure, Validator } from '../base/validation';
 
 
 
-export const AMERICA_REGEXP = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+export const AMERICA_REGEXP = /^(?:\(\d{3}\)|\d{3})[- ]?\d{3}[- ]?\d{4}$/;
 
 /**
  * Creates a validator that will validate an American phone number

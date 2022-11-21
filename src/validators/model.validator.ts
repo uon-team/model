@@ -7,11 +7,15 @@ import { Type, Injector } from '@uon/core';
  * @param modelType 
  * @param extra 
  */
-export function ValidateModel<T>(extra?: { [k in keyof Partial<T>]: Validator[] }): Validator {
+export function ValidateModel<T>(extra?: { [k in keyof Partial<T>]: Validator[] }, _skipUndefined = false): Validator {
 
     const func = async function validateModel(model: any, key: string, val: T, injector?: Injector) {
 
-        let validation = await Validate(val, extra, injector);
+        if (val == null || val == undefined) {
+            return val;
+        }
+
+        let validation = await Validate(val, extra, injector, 0, _skipUndefined);
 
         if (!validation.valid) {
             throw new ValidationFailure(ValidateModel,

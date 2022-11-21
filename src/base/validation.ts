@@ -51,7 +51,8 @@ export class ValidationFailure {
 export async function Validate<T>(target: T,
     extraValidators: { [k: string]: Validator[] } = {},
     injector: Injector = null,
-    _index: number = 0): Promise<ValidationResult<T>> {
+    _index: number = 0,
+    _skipUndefined = false): Promise<ValidationResult<T>> {
 
     // grab type
     const type = target.constructor as Type<T>;
@@ -83,7 +84,7 @@ export async function Validate<T>(target: T,
 
         for (let j = 0, jl = v.length; j < jl; ++j) {
 
-            if (value === undefined && (v[j] as any)._forceValidation !== true) {
+            if (value === undefined && ((v[j] as any)._forceValidation !== true || _skipUndefined)) {
                 continue;
             }
 

@@ -1,5 +1,5 @@
 
-import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator, PropertyNamesNotOfType } from '@uon/core'
+import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator, PropertyNamesNotOfType, GetTypeMetadata } from '@uon/core'
 import { Member, ID } from './member.decorator';
 import { ArrayMember } from './array.decorator';
 import { Mutations, ClearMutations, GetMutations, MakeDirty } from '../base/mutation';
@@ -7,6 +7,7 @@ import { JsonSerializer } from '../serializers/json.serializer';
 import { Validator } from '../base/validation';
 import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from '../base/constants';
 import { GetOrSet } from '../utils/getset';
+//import { GetModelMembers } from '../utils/model.utils';
 
 
 export interface ModelDecorator {
@@ -27,6 +28,8 @@ export interface ModelDecorator {
      */
     GetMutations<T>(obj: T): Mutations<T>;
 
+    HasMutations<T>(obj: T): boolean;
+
 
     /**
      * Helper for instanciating
@@ -34,6 +37,13 @@ export interface ModelDecorator {
      * @param data 
      */
     New<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>): T;
+
+    /**
+     * Helper for assigning values from one object to another
+     * @param target 
+     * @param args 
+     */
+    Assign<T>(target: T, ...args: any[]): T;
 
 }
 
@@ -141,10 +151,85 @@ Model.MakeDirty = MakeDirty;
 
 // GetMutations implementation
 Model.GetMutations = GetMutations;
+Model.HasMutations = function _HasMutation<T>(obj: T) {
+
+    const target_model = FindModelAnnotation((obj as any).constructor);
+    if (!target_model) {
+        throw new Error('obj type needs to be @Model decorated');
+    }
+
+    const data = GetOrSet(obj, MUT_SYMBOL);
+    for (let k in data) {
+        if (data[k]) {
+            return true;
+        }
+    }
+
+    // check embedded models
+    let members = GetModelMembers(target_model);
+    for (let m of members) {
+        if (m.model && !m.model.id) {
+            if ((obj as any)[m.key] && _HasMutation((obj as any)[m.key])) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 
 // New helper
 Model.New = function _Instanciate<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>) {
     return Object.assign(new type, data);
+}
+
+// assign helper
+Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
+
+    const target_model = FindModelAnnotation((target as any).constructor);
+    if (!target_model) {
+        throw new Error('target needs to be @Model decorated');
+    }
+
+    const embedded_model_by_key: { [k: string]: Member } = {};
+    const members = GetModelMembers(target_model);
+    for (let m of members) {
+        if (m.model && !m.model.id) {
+            embedded_model_by_key[m.key] = m;
+        }
+    }
+
+    for (let arg of args) {
+        let model = FindModelAnnotation(arg.constructor) as Model;
+        if (model) {
+            const data = GetOrSet(arg, DATA_SYMBOL);
+
+            // we need to allow partial update of embedded models
+            for (let k in data) {
+                if (data[k] === undefined) {
+                    continue;
+                }
+                else if (embedded_model_by_key[k]) {
+                    if (!(target as any)[k]) {
+                        // create a new instance
+                        (target as any)[k] = new embedded_model_by_key[k].type();
+
+                    }
+                    _Assign((target as any)[k], data[k]);
+                }
+                else {
+                    (target as any)[k] = data[k];
+                }
+            }
+
+        }
+        else {
+            Object.assign(target, arg);
+        }
+    }
+
+
+    return target;
 }
 
 /**
@@ -321,4 +406,42 @@ function FindParentClassPropDecorators<T>(type: Type<T>, ignore: string[]) {
 }
 
 
+function FindModelAnnotation<T>(type: Type<T>): any {
 
+    const annotations = GetTypeMetadata(type);
+    for (let i = 0, l = annotations.length; i < l; ++i) {
+        if (annotations[i].decoratorName === MODEL_DECORATOR_NAME) {
+            return annotations[i];
+        }
+    }
+
+    return null;
+}
+
+
+function GetModelMembers(model: Model): Member[] {
+
+    const annotations = model.properties;
+    const members_meta: Member[] = [];
+    for (let name in annotations) {
+        let member = ExtractMetaFromArray(annotations[name], Member);
+        if (member) {
+            members_meta.push(member);
+        }
+    }
+
+    return members_meta;
+
+}
+
+function ExtractMetaFromArray(arr: any[], type: any) {
+
+    for (let i = 0; i < arr.length; ++i) {
+
+        if (arr[i] instanceof type) {
+            return arr[i];
+        }
+    }
+
+    return null;
+}

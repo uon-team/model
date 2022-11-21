@@ -17,6 +17,7 @@ export function Prohibited(): Validator {
         return val;
 
     }
+    
 
     return func;
 
