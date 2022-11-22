@@ -169,8 +169,20 @@ Model.HasMutations = function _HasMutation<T>(obj: T) {
     let members = GetModelMembers(target_model);
     for (let m of members) {
         if (m.model && !m.model.id) {
-            if ((obj as any)[m.key] && _HasMutation((obj as any)[m.key])) {
-                return true;
+            if ((obj as any)[m.key]) {
+                if (m instanceof ArrayMember) {
+                    // if any object in the array has changes
+                    for (let v of (obj as any)[m.key]) {
+                        if (_HasMutation(v)) {
+                            return true;
+                        }
+                    }
+
+                }
+                else if (_HasMutation((obj as any)[m.key])) {
+                    return true;
+                }
+
             }
         }
     }
