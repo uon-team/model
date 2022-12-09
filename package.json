@@ -1,6 +1,6 @@
 {
     "name": "@uon/model",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A decorator-based schema/model library with json and binary (de)serialization",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

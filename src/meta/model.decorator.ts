@@ -198,6 +198,8 @@ Model.New = function _Instanciate<T>(type: Type<T>, data: Partial<Pick<T, Proper
 // assign helper
 Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
 
+
+
     const target_model = FindModelAnnotation((target as any).constructor);
     if (!target_model) {
         throw new Error('target needs to be @Model decorated');
@@ -222,12 +224,20 @@ Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
                     continue;
                 }
                 else if (embedded_model_by_key[k]) {
-                    if (!(target as any)[k]) {
-                        // create a new instance
-                        (target as any)[k] = new embedded_model_by_key[k].type();
 
+                    if (embedded_model_by_key[k] instanceof ArrayMember) {
+                        // just copy the array and we won't go further
+                        // TODO deep clone
+                        (target as any)[k] = (data[k] as any[]).slice();
                     }
-                    _Assign((target as any)[k], data[k]);
+                    else {
+                        if (!(target as any)[k]) {
+                            (target as any)[k] = new embedded_model_by_key[k].type();
+                        }
+
+                        _Assign((target as any)[k], data[k]);
+                    }
+                   
                 }
                 else {
                     (target as any)[k] = data[k];
