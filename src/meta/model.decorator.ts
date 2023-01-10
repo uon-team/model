@@ -1,5 +1,5 @@
 
-import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator, PropertyNamesNotOfType, GetTypeMetadata } from '@uon/core'
+import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator, PropertyNamesNotOfType, GetTypeMetadata, GetPropertiesOwnMetadata } from '@uon/core'
 import { Member, ID } from './member.decorator';
 import { ArrayMember } from './array.decorator';
 import { Mutations, ClearMutations, GetMutations, MakeDirty } from '../base/mutation';
@@ -60,6 +60,7 @@ export interface ModelOptions {
 }
 
 
+declare var console: any;
 
 /**
  * 
@@ -77,7 +78,7 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
             meta.validators = {};
 
             // get property annotations map
-            const own_properties_meta: any = GetPropertiesMetadata(target.prototype) || {};
+            const own_properties_meta: any = GetPropertiesOwnMetadata(target.prototype) || {};
             const all_properties_meta = Object.assign({},
                 own_properties_meta,
                 FindParentClassPropDecorators(target, Object.keys(own_properties_meta))
@@ -192,7 +193,7 @@ Model.HasMutations = function _HasMutation<T>(obj: T) {
 
 // New helper
 Model.New = function _Instanciate<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>) {
-    return Object.assign(new type, data);
+    return Model.Assign(new type, data);
 }
 
 // assign helper

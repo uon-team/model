@@ -29,6 +29,9 @@ export function ValidateModel<T>(extra?: { [k in keyof Partial<T>]: Validator[] 
 
     }
 
+    //
+    func._fieldValidators = extra;
+
     return func;
 
 }

@@ -84,7 +84,7 @@ export async function Validate<T>(target: T,
 
         for (let j = 0, jl = v.length; j < jl; ++j) {
 
-            if (value === undefined && ((v[j] as any)._forceValidation !== true || _skipUndefined)) {
+            if ((value === undefined || value === '' || value === null) && ((v[j] as any)._forceValidation !== true || _skipUndefined)) {
                 continue;
             }
 

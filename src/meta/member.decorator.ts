@@ -52,7 +52,7 @@ export interface MemberOptions {
      * Coerse the incoming value to the target type during deserialization
      * @param v 
      */
-    coerse?<I, T>(v: I): T;
+    coerse?(v: any): any;
 
 
 }
