@@ -11,7 +11,7 @@ export function Required(): Validator {
 
     const func = function required(model: any, key: string, val: any) {
 
-        if (val === null || val === undefined || val === '') {
+        if (val === null || val === undefined || val === '' || (typeof val === 'number' && isNaN(val))) {
             throw new ValidationFailure(Required, key, val, `field is required`);
         }
 
