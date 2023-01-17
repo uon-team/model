@@ -12,7 +12,16 @@ export function ValidatePattern(pattern: RegExp) {
     return function (model: any, key: string, val: string) {
 
         if (!pattern.test(val)) {
-            throw new ValidationFailure(ValidatePattern, key, val, `"${val}" does not match pattern ${pattern.toString()}`);
+            throw new ValidationFailure(
+                ValidatePattern,
+                key,
+                val,
+                {
+                    msg: `does not match pattern`,
+                    value: val,
+                    pattern: pattern.toString()
+                }
+            );
         }
 
         return val;
@@ -28,7 +37,11 @@ export function ValidateMongoId() {
     return function (model: any, key: string, val: string) {
 
         if (val && val.match(MONGO_ID_REGEX) == null) {
-            throw new ValidationFailure(ValidateMongoId, key, val, `"${val}" does not match pattern ${MONGO_ID_REGEX.toString()}`);
+            throw new ValidationFailure(ValidateMongoId, key, val, {
+                msg: 'must be a valid id',
+                value: val
+
+            });
         }
 
         return val;
@@ -44,14 +57,18 @@ export function MinLength(min: number) {
 
     return function (model: any, key: string, val: string | any[]) {
 
-        if(val === null || val === undefined) {
+        if (val === null || val === undefined) {
             return val;
         }
 
         let str_len = val.length;
 
         if (str_len < min) {
-            throw new ValidationFailure(MinLength, key, val, `below minimum length`);
+            throw new ValidationFailure(MinLength, key, val, {
+                msg: `below minimum length`,
+                minLength: min,
+                length: val.length
+            });
         }
 
         return val;
@@ -67,14 +84,18 @@ export function MaxLength(max: number) {
 
     return function (model: any, key: string, val: string | any[]) {
 
-        if(val === null || val === undefined) {
+        if (val === null || val === undefined) {
             return val;
         }
-        
+
         let str_len = val.length;
 
         if (str_len > max) {
-            throw new ValidationFailure(MaxLength, key, val, `above maximum length`);
+            throw new ValidationFailure(MaxLength, key, val, {
+                msg: `above maximum length`,
+                maxLength: max,
+                length: val.length
+            });
         }
 
         return val;

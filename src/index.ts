@@ -7,6 +7,7 @@ MIT Licensed
 
 
 export * from './base/validation';
+export * from './base/validator';
 export * from './base/number.type';
 
 export * from './meta/model.decorator';
@@ -14,6 +15,7 @@ export * from './meta/member.decorator';
 export * from './meta/number.decorator';
 export * from './meta/array.decorator';
 
+export * from './validators/equality.validator';
 export * from './validators/number.validator';
 export * from './validators/string.validator';
 export * from './validators/email.validator';

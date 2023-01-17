@@ -1,5 +1,6 @@
 
-import { ValidationFailure, Validator } from '../base/validation';
+import { Validator } from '../base/validator';
+import { ValidationFailure } from '../base/validation';
 
 
 
@@ -13,7 +14,7 @@ export function ValidateEmail(): Validator {
     return function (model: any, key: string, val: string) {
 
         if (!EMAIL_REGEXP.test(val as string)) {
-            throw new ValidationFailure(ValidateEmail, key, val, `not a valid email address`);
+            throw new ValidationFailure(ValidateEmail, key, val, { msg: `not a valid email address` });
         }
 
         return val;

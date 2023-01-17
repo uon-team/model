@@ -1,4 +1,5 @@
-import { Validator, ValidationFailure } from "../base/validation";
+import { Validator } from "../base/validator";
+import { ValidationFailure } from "../base/validation";
 
 
 
@@ -11,13 +12,13 @@ export function Prohibited(): Validator {
     const func = function prohibited(model: any, key: string, val: any) {
 
         if (val !== null || val !== undefined) {
-            throw new ValidationFailure(Prohibited, key, val, `field is prohibited`);
+            throw new ValidationFailure(Prohibited, key, val, { msg: `field is prohibited` });
         }
 
         return val;
 
     }
-    
+
 
     return func;
 

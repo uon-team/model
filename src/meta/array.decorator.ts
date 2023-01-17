@@ -1,6 +1,6 @@
 import { Type, MakeUnique, MakePropertyDecorator, GetMetadata, GetTypeMetadata } from "@uon/core";
 import { Member, MemberOptions, ID } from "./member.decorator";
-import { Validator } from "../base/validation";
+import { Validator } from "../base/validator";
 import { TypedNumber } from "../base/number.type";
 import { ARRAY_MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME } from "../base/constants";
 

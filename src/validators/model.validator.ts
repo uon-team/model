@@ -1,6 +1,8 @@
 
-import { ValidationFailure, Validator, Validate } from '../base/validation';
+import { ValidationFailure, Validate } from '../base/validation';
+import { Validator } from '../base/validator';
 import { Type, Injector } from '@uon/core';
+
 
 /**
  * Create a model validator
@@ -15,14 +17,10 @@ export function ValidateModel<T>(extra?: { [k in keyof Partial<T>]: Validator[] 
             return val;
         }
 
-        let validation = await Validate(val, extra, injector, 0, _skipUndefined);
+        let validation = await Validate(val, extra, injector, key, _skipUndefined);
 
         if (!validation.valid) {
-            throw new ValidationFailure(ValidateModel,
-                key,
-                val,
-                validation.failures.map(f => '\t' + f.key + ': ' + f.reason).join('\n')
-            );
+            throw validation;
         }
 
         return val;
@@ -31,6 +29,7 @@ export function ValidateModel<T>(extra?: { [k in keyof Partial<T>]: Validator[] 
 
     //
     func._fieldValidators = extra;
+    func._modelValidator = true;
 
     return func;
 

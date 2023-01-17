@@ -1,6 +1,7 @@
 
 
-import { ValidationFailure, Validator } from '../base/validation';
+import { Validator } from '../base/validator';
+import { ValidationFailure } from '../base/validation';
 
 
 /**
@@ -12,12 +13,27 @@ export function ValidateRange(min: number, max: number): Validator {
 
     return function (model: any, key: string, val: number) {
 
+        if (typeof val !== 'number') {
+            throw new ValidationFailure(ValidateRange, key, val, {
+                msg: `value must be a number`,
+                type: typeof val
+            });
+        }
+
         if (typeof min === 'number' && val < min) {
-            throw new ValidationFailure(ValidateRange, key, val, `below minimum value`);
+            throw new ValidationFailure(ValidateRange, key, val, {
+                msg: `below minimum value`,
+                min: min,
+                value: val
+            });
         }
 
         if (typeof max === 'number' && val > max) {
-            throw new ValidationFailure(ValidateRange, key, val, `above maximum value`);
+            throw new ValidationFailure(ValidateRange, key, val, {
+                msg: `above maximum value`,
+                max: max,
+                value: val
+            });
         }
 
         return val;

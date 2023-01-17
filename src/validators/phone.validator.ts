@@ -1,5 +1,6 @@
 
-import { ValidationFailure, Validator } from '../base/validation';
+import { Validator } from '../base/validator';
+import { ValidationFailure } from '../base/validation';
 
 
 
@@ -14,7 +15,7 @@ export function ValidatePhone(): Validator {
     return function (model: any, key: string, val: string) {
 
         if (!AMERICA_REGEXP.test(val as string)) {
-            throw new ValidationFailure(ValidatePhone, key, val, `not a valid phone number`);
+            throw new ValidationFailure(ValidatePhone, key, val, { msg: `not a valid phone number` });
         }
 
         return val;
