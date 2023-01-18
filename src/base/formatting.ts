@@ -6,7 +6,7 @@ import { Formatter } from "./formatter";
 
 
 
-export function FormatModel<T>(target: T) {
+export function ApplyFormatting<T>(target: T) {
 
     const type = target.constructor as Type<T>;
     const model = type ? FindModelAnnotation(type) as Model : null;
@@ -24,7 +24,7 @@ export function FormatModel<T>(target: T) {
         }
 
         if (member.model) {
-            FormatModel(target[key]);
+            ApplyFormatting(target[key]);
         }
         else if (all_formaters[key]) {
 

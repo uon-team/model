@@ -5,10 +5,9 @@ import { ArrayMember } from './array.decorator';
 import { Mutations, ClearMutations, GetMutations, MakeDirty } from '../base/mutation';
 import { JsonSerializer } from '../serializers/json.serializer';
 import { Validator } from '../base/validator';
+import { Formatter } from '../base/formatter';
 import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from '../base/constants';
 import { GetOrSet } from '../utils/getset';
-import { Formatter } from 'src/base/formatter';
-//import { GetModelMembers } from '../utils/model.utils';
 
 
 export interface ModelDecorator {

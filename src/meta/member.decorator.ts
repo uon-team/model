@@ -7,8 +7,9 @@ import {
     GetTypeMetadata
 } from '@uon/core'
 import { Validator } from '../base/validator';
+import { Formatter } from '../base/formatter';
 import { MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME, ID_DECORATOR_NAME } from '../base/constants';
-import { Formatter } from 'src/base/formatter';
+
 
 /**
  * MemberDecorator interface makes tsc happy
@@ -56,10 +57,10 @@ export interface MemberOptions {
 
 
     /**
-     * Coerse the incoming value to the target type during deserialization
+     * Coerce the incoming value to the target type during deserialization
      * @param v 
      */
-    coerse?(v: any): any;
+    coerce?(v: any): any;
 
 
 }
