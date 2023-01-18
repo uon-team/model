@@ -5,7 +5,8 @@ MIT Licensed
 ********************************************************************************* */
 
 
-
+export * from './base/formatting';
+export * from './base/formatter';
 export * from './base/validation';
 export * from './base/validator';
 export * from './base/number.type';

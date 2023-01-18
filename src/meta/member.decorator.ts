@@ -8,6 +8,7 @@ import {
 } from '@uon/core'
 import { Validator } from '../base/validator';
 import { MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME, ID_DECORATOR_NAME } from '../base/constants';
+import { Formatter } from 'src/base/formatter';
 
 /**
  * MemberDecorator interface makes tsc happy
@@ -46,6 +47,12 @@ export interface MemberOptions {
      * An array of validator to call when Validate() is invoked 
      */
     validators?: Validator[];
+
+
+    /**
+     * A list of formatters
+     */
+    formatters?: Formatter[];
 
 
     /**

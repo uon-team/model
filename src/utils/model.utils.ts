@@ -1,5 +1,5 @@
 
-import { GetTypeMetadata, Type } from "@uon/core"
+import { GetTypeMetadata, PropertyNamesNotOfType, Type } from "@uon/core"
 import { Member } from "../meta/member.decorator"
 import { Model } from "../meta/model.decorator"
 import { MODEL_DECORATOR_NAME } from "../base/constants"
@@ -39,6 +39,32 @@ export function GetModelMembers(model: Model): Member[] {
 
     return members_meta;
 
+}
+
+export function GetModelMembersMap(model: Model): { [k: string]: Member } {
+
+    const annotations = model.properties;
+    const result: { [k: string]: Member } = {};
+    for (let name in annotations) {
+        let member = ExtractMetaFromArray(annotations[name], Member);
+        if (member) {
+            result[name] = member;
+        }
+    }
+
+    return result;
+
+}
+
+
+export function GetMemberForKey(model: Model, key: string): Member | null {
+    const annotations = model.properties;
+
+    if (annotations[key]) {
+        return ExtractMetaFromArray(annotations[key], Member);
+    }
+
+    return null;
 }
 
 

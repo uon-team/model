@@ -7,6 +7,7 @@ import { JsonSerializer } from '../serializers/json.serializer';
 import { Validator } from '../base/validator';
 import { MODEL_DECORATOR_NAME, DATA_SYMBOL, MUT_SYMBOL } from '../base/constants';
 import { GetOrSet } from '../utils/getset';
+import { Formatter } from 'src/base/formatter';
 //import { GetModelMembers } from '../utils/model.utils';
 
 
@@ -76,6 +77,7 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
 
             // keep a list of validators handy
             meta.validators = {};
+            meta.formatters = {};
 
             // get property annotations map
             const own_properties_meta: any = GetPropertiesOwnMetadata(target.prototype) || {};
@@ -114,6 +116,10 @@ export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
                         meta.validators[m.key] = m.validators;
                     }
 
+                    if (m.formatters) {
+                        meta.formatters[m.key] = m.formatters;
+                    }
+
                     // replace field with getter setter
                     if (name in own_properties_meta) {
                         ReplacePropertyWithGetterSetter(target.prototype, name, m);
@@ -142,6 +148,7 @@ export interface Model extends ModelOptions {
     type: Type<any>;
     properties: { [k: string]: any[] };
     validators: { [k: string]: Validator[] };
+    formatters: { [k: string]: Formatter[] };
     id: ID;
 }
 
