@@ -1,4 +1,5 @@
 import { PropertyNamesNotOfType, Type } from "@uon/core";
+import { ArrayMember } from "../meta/array.decorator";
 import { Model } from "../meta/model.decorator";
 import { FindModelAnnotation, GetMemberForKey, GetModelMembers } from "../utils/model.utils";
 import { Formatter } from "./formatter";
@@ -24,7 +25,18 @@ export function ApplyFormatting<T>(target: T) {
         }
 
         if (member.model) {
-            ApplyFormatting(target[key]);
+
+            if (member instanceof ArrayMember) {
+                let subject = target[key] as unknown as any[];
+                for (let v of subject) {
+                    ApplyFormatting(v);
+                }
+            }
+            else {
+                ApplyFormatting(target[key]);
+            }
+
+
         }
         else if (all_formaters[key]) {
 
