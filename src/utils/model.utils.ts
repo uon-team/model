@@ -1,5 +1,5 @@
 
-import { GetTypeMetadata, PropertyNamesNotOfType, Type } from "@uon/core"
+import { GetTypeMetadata, GetTypeOwnMetadata, PropertyNamesNotOfType, Type } from "@uon/core"
 import { Member } from "../meta/member.decorator"
 import { Model } from "../meta/model.decorator"
 import { MODEL_DECORATOR_NAME } from "../base/constants"
@@ -11,7 +11,7 @@ import { MODEL_DECORATOR_NAME } from "../base/constants"
  */
 export function FindModelAnnotation<T>(type: Type<T>): any {
 
-    const annotations = GetTypeMetadata(type);
+    const annotations = GetTypeOwnMetadata(type);
     for (let i = 0, l = annotations.length; i < l; ++i) {
         if (annotations[i].decoratorName === MODEL_DECORATOR_NAME) {
             return annotations[i];
