@@ -1,14 +1,12 @@
 
-import { Type, GetTypeMetadata, MakeUnique } from '@uon/core';
+import {Type} from '@uon/core';
 import { Member, ID } from '../meta/member.decorator';
 import { ArrayMember } from '../meta/array.decorator';
 import { FindModelAnnotation, GetModelMembers } from '../utils/model.utils';
 import { ClearMutations, GetMutations } from '../base/mutation';
 
-const JSON_SERIALIZER_IMPL_CACHE = MakeUnique(
-    `@uon/model/json/impl-cache`,
-    new Map<Type<any>, JsonSerializerImpl<any>>()
-);
+const JSON_SERIALIZER_IMPL_CACHE = new Map<Type<any>, JsonSerializerImpl<any>>()
+
 
 
 class JsonSerializerImpl<T> {
@@ -20,7 +18,11 @@ class JsonSerializerImpl<T> {
 
     }
 
-    serialize(obj: T, mutationsOnly: boolean = false): object {
+    serialize(obj: T, mutationsOnly: boolean = false): object | null {
+
+		if(obj === null) {
+			return null;
+		}
 
         const mutations = GetMutations(obj);
         let stack = this._serializeStack;
@@ -67,7 +69,7 @@ class JsonSerializerImpl<T> {
             }
         }
 
-        // clear dirty fields as this is a brand new instance
+        // clear dirty fields as this is a brand-new instance
         if (clearMutations) {
             ClearMutations(result);
         }
@@ -97,16 +99,16 @@ class JsonSerializerImpl<T> {
             // handle array member
             if (member instanceof ArrayMember) {
 
-                let serialize_handler = GetSerializeHandler(member.type);
+                let serialize_handler = GetSerializeHandler(member.type!);
                 this._serializeStack[member.key] = CreateArrayHandler(serialize_handler);
 
-                let deserialize_handler = GetDeserializeHandler(member.type);
+                let deserialize_handler = GetDeserializeHandler(member.type!);
                 this._deserializeStack[member.key] = CreateArrayHandler(deserialize_handler);
 
             }
             else {
-                this._serializeStack[member.key] = GetSerializeHandler(member.type);
-                this._deserializeStack[member.key] = GetDeserializeHandler(member.type);
+                this._serializeStack[member.key] = GetSerializeHandler(member.type!);
+                this._deserializeStack[member.key] = GetDeserializeHandler(member.type!);
             }
 
 
@@ -131,7 +133,7 @@ export class JsonSerializer<T> {
         this._impl = GetOrCreateModelSerializerImpl(this._type);
         return this._impl;
     }
-    private _impl: JsonSerializerImpl<T>;
+    private _impl!: JsonSerializerImpl<T>;
 
     constructor(private _type: Type<T>) {
 
@@ -142,14 +144,12 @@ export class JsonSerializer<T> {
      * @param val
      * @param mutationsOnly 
      */
-    serialize(val: T, mutationsOnly: boolean = false): object {
+    serialize(val: T, mutationsOnly: boolean = false): object | null {
         return this.impl.serialize(val, mutationsOnly);
     }
 
     /**
      * Deserialize a value to the provided type
-     * @param type 
-     * @param val 
      */
     deserialize(val: object, clearMutations: boolean = true): T {
         return this.impl.deserialize(val, clearMutations);
@@ -196,6 +196,10 @@ function DateHandler(val: Date) {
     return new Date(val);
 }
 
+function ToJsonableHandler(val: {toJSON(): any}) {
+	return val.toJSON();
+}
+
 
 function GetSerializeHandler(type: Type<any>) {
 
@@ -216,6 +220,11 @@ function GetSerializeHandler(type: Type<any>) {
         let impl = GetOrCreateModelSerializerImpl(type);
         return impl.serialize.bind(impl);
     }
+
+	// maybe an object with toJSON
+	if(typeof type.prototype.toJSON === 'function') {
+		return ToJsonableHandler;
+	}
 
     // finally handle plain object, just using identity for now
     if (type === Object) {
@@ -244,6 +253,13 @@ function GetDeserializeHandler(type: Type<any>) {
         let impl = GetOrCreateModelSerializerImpl(type);
         return impl.deserialize.bind(impl);
     }
+
+	if(typeof type.prototype.toJSON === 'function') {
+		return (v: any) => {
+			let obj = Object.create(type.prototype);
+			return Object.assign(obj, v);
+		};
+	}
 
     // finally handle plain object, just using identity for now
     if (type === Object) {

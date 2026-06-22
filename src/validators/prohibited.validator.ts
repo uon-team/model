@@ -11,7 +11,7 @@ export function Prohibited(): Validator {
 
     const func = function prohibited(model: any, key: string, val: any) {
 
-        if (val !== null || val !== undefined) {
+        if (val !== null && val !== undefined) {
             throw new ValidationFailure(Prohibited, key, val, { msg: `field is prohibited` });
         }
 

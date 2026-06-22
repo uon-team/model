@@ -1,9 +1,8 @@
 
 import {
-    Type,
-    GetMetadata,
-    MakePropertyDecorator,
-    MakeUnique
+	Type,
+	GetMetadata,
+	MakePropertyDecorator, MakeUnique,
 } from '@uon/core'
 import { Member } from './member.decorator';
 import { NUMBER_MEMBER_DECORATOR_NAME } from '../base/constants';
@@ -30,15 +29,15 @@ export const NumberMember: NumberMemberDecorator = MakeUnique(NUMBER_MEMBER_DECO
     MakePropertyDecorator(NUMBER_MEMBER_DECORATOR_NAME,
         (type: NumberType) => ({ type }),
         Member,
-        (target: any, meta: NumberMember, key: string) => {
+        (target: any, meta: NumberMember, key: string | symbol) => {
 
-            // get the field type 
+            // get the field type
             let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
 
             if (type && type != Number) {
                 throw new Error(`NumberType decorator can only be declared on property with type Number`);
             }
 
-            meta.key = key;
+            meta.key = key as string;
 
         }));

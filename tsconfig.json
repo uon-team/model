@@ -2,11 +2,14 @@
     "compilerOptions": {
         "baseUrl": "./",
         "moduleResolution": "node",
+        "ignoreDeprecations": "6.0",
         "module": "commonjs",
         "target": "es2015",
+        "strict": true,
         "noImplicitAny": true,
         "sourceMap": true,
         "declaration": true,
+        "rootDir": "./src",
         "outDir": "dist/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -16,12 +19,12 @@
         ]
     },
     "include": [
-        "src/**/*",
-        "tests.ts"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules",
         "typings/global",
-        "typings/global.d.ts"
+        "typings/global.d.ts",
+        "src/**/*.spec.ts"
     ]
 }

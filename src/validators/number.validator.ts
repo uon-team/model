@@ -13,7 +13,7 @@ export function ValidateRange(min: number, max: number): Validator {
 
     return function (model: any, key: string, val: number) {
 
-        if (typeof val !== 'number') {
+        if (typeof val !== 'number' || isNaN(val)) {
             throw new ValidationFailure(ValidateRange, key, val, {
                 msg: `value must be a number`,
                 type: typeof val

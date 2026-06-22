@@ -1,4 +1,4 @@
-import { Type, MakeUnique } from "@uon/core";
+import {Type} from "@uon/core";
 import { FindModelAnnotation, GetModelMembers } from "../utils/model.utils";
 import { Utf8ToBase64, Base64ToUtf8 } from "../utils/base64";
 import { Member } from "../meta/member.decorator";
@@ -15,13 +15,12 @@ const UNDEFINED_ARRAY_BUFFER = new Uint8Array([0xC0, 0x80]);
 const NULL_ARRAY_BUFFER = new Uint8Array([0]);
 
 
-const BINARY_SERIALIZER_IMPL_CACHE = MakeUnique(`@uon/model/binary/impl-cache`,
-    new Map<Type<any>, BinarySerializerImpl<any>>());
+const BINARY_SERIALIZER_IMPL_CACHE = new Map<Type<any>, BinarySerializerImpl<any>>();
 
 class BinarySerializerImpl<T> {
 
-    private _members: Member[];
-    private _keys: string[];
+    private _members!: Member[];
+    private _keys!: string[];
 
     private _serializeStack: { [k: string]: Function } = {};
     private _deserializeStack: { [k: string]: Function } = {};
@@ -113,7 +112,13 @@ class BinarySerializerImpl<T> {
             return m.key;
         });
 
-        // go over each member meta and create grab it's type serialization function
+        // member indices are written as Uint8 (the "defined indices" header),
+        // so the highest index (keys.length - 1) must fit in a byte
+        if (keys.length > 256) {
+            throw new Error(`Binary serialization supports at most 256 members; ${this.type.name} has ${keys.length}.`);
+        }
+
+        // go over each member meta and create grab its type serialization function
         for (let i = 0, l = members_meta.length; i < l; ++i) {
 
             const member = members_meta[i];
@@ -152,17 +157,31 @@ export class BinarySerializer<T> {
         this._impl = GetOrCreateModelSerializerImpl(this._type);
         return this._impl;
     }
-    private _impl: BinarySerializerImpl<T>;
+    private _impl!: BinarySerializerImpl<T>;
 
     constructor(private _type: Type<T>) {
-       
+
     }
 
+    /**
+     * Serialize a model instance to a compact ArrayBuffer.
+     * null/undefined members are omitted. Throws if the model has more than
+     * 256 members.
+     * @param obj the model instance
+     * @returns the serialized ArrayBuffer
+     */
     serialize(obj: T): ArrayBuffer {
 
         return this.impl.serialize(obj);
     }
 
+    /**
+     * Deserialize an ArrayBuffer (produced by serialize) back to a model instance.
+     * Validates lengths and throws a descriptive error on a malformed/truncated
+     * buffer.
+     * @param buffer the buffer to read
+     * @returns the deserialized model instance
+     */
     deserialize(buffer: ArrayBuffer): T {
 
         return this.impl.deserialize(buffer);
@@ -205,9 +224,20 @@ function StringToBinary(str: string): ArrayBuffer {
 
 function ReadString(buffer: ArrayBuffer, offset: number): [string, number] {
 
+    // bounds-check the 4-byte length prefix and the declared length against the
+    // buffer so a malformed/truncated buffer throws a clear error instead of a
+    // raw RangeError or reading out of bounds
+    if (offset + 4 > buffer.byteLength) {
+        throw new Error('Invalid buffer: not enough bytes to read string length.');
+    }
+
     let dv = new DataView(buffer, offset);
     //let u8 = new Uint8Array(buffer);
     let len = dv.getUint32(0);
+
+    if (offset + 4 + len > buffer.byteLength) {
+        throw new Error(`Invalid buffer: string length ${len} exceeds the remaining buffer.`);
+    }
 
     let result: string = '';
 
@@ -382,8 +412,20 @@ function CreateArraySerializeHandler(handler: (value: any) => any) {
 function CreateArrayDeserializeHandler(handler: (buffer: ArrayBuffer, offset: number) => [any, number]) {
     return function array_handler(buffer: ArrayBuffer, offset: number): [any[], number] {
 
+        if (offset + 4 > buffer.byteLength) {
+            throw new Error('Invalid buffer: not enough bytes to read array length.');
+        }
+
         const dv = new DataView(buffer, offset);
         let array_len = dv.getUint32(0);
+
+        // every element occupies at least 1 byte, so an array length larger than
+        // the remaining buffer is impossible — reject it instead of allocating a
+        // huge array / looping (guards against OOM on untrusted input)
+        if (array_len > buffer.byteLength - (offset + 4)) {
+            throw new Error(`Invalid buffer: array length ${array_len} exceeds the remaining buffer.`);
+        }
+
         let read_offset = 4;
         let result: any[] = new Array(array_len);
 

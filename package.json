@@ -1,14 +1,24 @@
 {
     "name": "@uon/model",
-    "version": "1.0.8",
+    "version": "1.2.0",
     "description": "A decorator-based schema/model library with json and binary (de)serialization",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "TS_NODE_PROJECT=tsconfig.test.json node --require ts-node/register --test \"src/**/*.spec.ts\""
+    },
     "peerDependencies": {
-        "@uon/core": "^1.0.1"
+        "@uon/core": "^1.1.0"
     },
     "dependencies": {
         "tslib": "^2.4.1"
+    },
+    "devDependencies": {
+        "@types/node": "^25.8.0",
+        "reflect-metadata": "^0.2.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^6.0.3"
     },
     "repository": {
         "type": "git",
