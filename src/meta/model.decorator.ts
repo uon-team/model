@@ -90,7 +90,7 @@ export interface ModelOptions {
 export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
     MakeTypeDecorator(MODEL_DECORATOR_NAME,
         (options?: ModelOptions) => options,
-        null,
+        undefined,
         (target: Type<any>, meta: Model) => {
 
             // assign type to model
@@ -266,7 +266,7 @@ Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
 						}
 						else {
 							if (!(target as any)[k]) {
-								(target as any)[k] = new embedded_model_by_key[k].type();
+								(target as any)[k] = new (embedded_model_by_key[k].type as Type<any>)();
 							}
 							_Assign((target as any)[k], data[k]);
 						}
@@ -281,7 +281,7 @@ Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
 
         }
         else {
-            Object.assign(target, arg);
+            Object.assign(target as any, arg);
         }
     }
 
@@ -325,7 +325,7 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, member: Membe
     }
 
     // property getter
-    const getter = function () {
+    const getter = function (this: any) {
         const data = GetOrSet(this, DATA_SYMBOL);
         return data[key];
     };
@@ -354,14 +354,14 @@ function ReplacePropertyWithGetterSetter(target: any, key: string, member: Membe
 
 function CreateForeverCleanSetter(key: string) {
 
-    return function clean_setter(val: any) {
+    return function clean_setter(this: any, val: any) {
         GetOrSet(this, DATA_SYMBOL)[key] = val;
     }
 }
 
 function CreateGenericSetter(key: string) {
 
-    return function generic_setter(val: any) {
+    return function generic_setter(this: any, val: any) {
 
         const data = GetOrSet(this, DATA_SYMBOL);
         const dirty = GetOrSet(this, MUT_SYMBOL);
@@ -377,7 +377,7 @@ function CreateGenericSetter(key: string) {
 
 function CreateArraySetter(key: string) {
 
-    return function array_setter(val: any) {
+    return function array_setter(this: any, val: any) {
 
         const data = GetOrSet(this, DATA_SYMBOL);
         const dirty = GetOrSet(this, MUT_SYMBOL);

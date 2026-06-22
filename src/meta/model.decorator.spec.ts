@@ -7,8 +7,8 @@ import { FindModelAnnotation, GetModelMembers } from '../utils/model.utils';
 
 @Model()
 class Widget {
-    @Member() name: string;
-    @Member() count: number;
+    @Member() name!: string;
+    @Member() count!: number;
 }
 
 describe('@Model decorator', () => {
@@ -95,7 +95,7 @@ describe('Model.New / Model.Assign', () => {
 describe('Modelize', () => {
     test('decorates an existing plain class', () => {
         class Plain {
-            label: string;
+            label!: string;
         }
         Reflect.defineMetadata('design:type', String, Plain.prototype, 'label');
         Modelize(Plain, { label: Member() } as any);

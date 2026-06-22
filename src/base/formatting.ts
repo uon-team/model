@@ -9,12 +9,12 @@ import { Formatter } from "./formatter";
 
 export function ApplyFormatting<T>(target: T) {
 
-    const type = target.constructor as Type<T>;
+    const type = (target as any).constructor as Type<T>;
     const model = type ? FindModelAnnotation(type) as Model : null;
 
     const all_formaters: { [K in keyof T]: Formatter[] } = model ? Object.assign({}, model.formatters as any) : {};
 
-    const members = GetModelMembers(model);
+    const members = model ? GetModelMembers(model) : [];
 
     for (let member of members) {
 

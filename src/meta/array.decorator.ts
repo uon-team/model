@@ -39,9 +39,9 @@ export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORAT
     MakePropertyDecorator(ARRAY_MEMBER_DECORATOR_NAME,
         (elementType: Type<any> | TypedNumber, options?: ArrayMemberOptions) => ({ type: elementType, ...options }),
         Member,
-        (target: any, meta: ArrayMember, key: string) => {
+        (target: any, meta: ArrayMember, key: string | symbol) => {
 
-            // get the field type 
+            // get the field type
             let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
 
             // can only use ArrayMember decorator on array members
@@ -51,7 +51,7 @@ export const ArrayMember: ArrayMemberDecorator = MakeUnique(ARRAY_MEMBER_DECORAT
 
             let annotations = GetTypeMetadata(meta.type as Type<any>);
 
-            meta.key = key;
+            meta.key = key as string;
             meta.model = annotations.find(a => a.decoratorName === MODEL_DECORATOR_NAME);
             
         }));

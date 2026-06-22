@@ -8,10 +8,10 @@ import { BinarySerializer } from './binary.serializer';
 
 @Model()
 class Item {
-    @Member() label: string;
-    @Member() qty: number;
-    @Member() active: boolean;
-    @ArrayMember(Number) scores: number[];
+    @Member() label!: string;
+    @Member() qty!: number;
+    @Member() active!: boolean;
+    @ArrayMember(Number) scores!: number[];
 }
 
 describe('BinarySerializer', () => {
@@ -55,7 +55,7 @@ describe('BinarySerializer', () => {
     test('throws on a bogus array length rather than allocating', () => {
         @Model()
         class ListOnly {
-            @ArrayMember(Number) values: number[];
+            @ArrayMember(Number) values!: number[];
         }
         const s = new BinarySerializer(ListOnly);
 

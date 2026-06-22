@@ -19,8 +19,8 @@ const BINARY_SERIALIZER_IMPL_CACHE = new Map<Type<any>, BinarySerializerImpl<any
 
 class BinarySerializerImpl<T> {
 
-    private _members: Member[];
-    private _keys: string[];
+    private _members!: Member[];
+    private _keys!: string[];
 
     private _serializeStack: { [k: string]: Function } = {};
     private _deserializeStack: { [k: string]: Function } = {};
@@ -157,7 +157,7 @@ export class BinarySerializer<T> {
         this._impl = GetOrCreateModelSerializerImpl(this._type);
         return this._impl;
     }
-    private _impl: BinarySerializerImpl<T>;
+    private _impl!: BinarySerializerImpl<T>;
 
     constructor(private _type: Type<T>) {
 

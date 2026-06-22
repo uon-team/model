@@ -11,19 +11,19 @@ import { ValidateModel } from '../validators/model.validator';
 @Model()
 class Address {
     @Member({ validators: [Required()] })
-    street: string;
+    street!: string;
 }
 
 @Model()
 class User {
     @Member({ validators: [Required()] })
-    name: string;
+    name!: string;
 
     @Member({ validators: [ValidateRange(0, 120)] })
-    age: number;
+    age!: number;
 
     @Member({ validators: [ValidateModel()] })
-    address: Address;
+    address!: Address;
 }
 
 describe('Validate', () => {
@@ -57,7 +57,7 @@ describe('Validate', () => {
         });
         const result = await Validate(u);
         assert.equal(result.valid, false);
-        assert.equal(result.children['age'].valid, false);
+        assert.equal(result.children['age']!.valid, false);
     });
 
     // regression: an embedded ModelValidationResult used to be pushed into its
@@ -81,7 +81,7 @@ describe('Validate', () => {
         }
 
         // the actual failure lives under the embedded model's own child
-        assert.equal(child.children['street'].valid, false);
+        assert.equal(child.children['street']!.valid, false);
     });
 
     test('flatten() does not throw and lists the offending paths', async () => {

@@ -8,16 +8,16 @@ import { JsonSerializer } from './json.serializer';
 
 @Model()
 class Tag {
-    @Member() name: string;
+    @Member() name!: string;
 }
 
 @Model()
 class Post {
-    @Member() title: string;
-    @Member() views: number;
-    @Member() published: boolean;
-    @Member() created: Date;
-    @ArrayMember(Tag) tags: Tag[];
+    @Member() title!: string;
+    @Member() views!: number;
+    @Member() published!: boolean;
+    @Member() created!: Date;
+    @ArrayMember(Tag) tags!: Tag[];
 }
 
 describe('JsonSerializer', () => {

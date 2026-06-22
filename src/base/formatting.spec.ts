@@ -8,13 +8,13 @@ import { ApplyFormatting } from './formatting';
 @Model()
 class Formatted {
     @Member({ formatters: [(t: any, k: string, v: any) => (v === '' ? 'EMPTY' : v)] })
-    label: string;
+    label!: string;
 
     @Member({ formatters: [(t: any, k: string, v: any) => v + 10] })
-    count: number;
+    count!: number;
 
     @Member({ formatters: [(t: any, k: string, v: any) => String(v).toUpperCase()] })
-    code: string;
+    code!: string;
 }
 
 describe('ApplyFormatting', () => {

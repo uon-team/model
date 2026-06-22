@@ -95,7 +95,8 @@ export class ModelValidationResult<T> extends ValidationResult<T> {
 
 		for (let k in this.children) {
 			let key = k as keyof ModelValidationMembers<T>;
-			if (!this.children[key].valid) {
+			const child = this.children[key];
+			if (child && !child.valid) {
 				return false;
 			}
 		}
@@ -143,7 +144,11 @@ export class ModelValidationResult<T> extends ValidationResult<T> {
 
 			// recurse
 			for (let k in val.children) {
-				let c = this._filter(ignored, val.children[k]);
+				const child = val.children[k];
+				if (!child) {
+					continue;
+				}
+				let c = this._filter(ignored, child);
 				result.children[k] = c;
 			}
 
@@ -179,12 +184,12 @@ export class ValidationFailure {
  */
 export async function Validate<T>(target: T,
 								  extraValidators: { [k: string]: Validator[] } = {},
-								  injector: Injector = null,
-								  _key: string = undefined,
+								  injector: Injector | null = null,
+								  _key?: string,
 								  _skipUndefined = false): Promise<ModelValidationResult<T>> {
 
 	// grab type
-	const type = target.constructor as Type<T>;
+	const type = (target as any).constructor as Type<T>;
 	const model = type ? FindModelAnnotation(type) as Model : null;
 
 
@@ -202,7 +207,7 @@ export async function Validate<T>(target: T,
 	const keys = Object.keys(validators) as unknown as (keyof ModelValidationMembers<T>)[];
 	const failures: ValidationFailure[] = [];
 
-	let result = new ModelValidationResult<T>(_key);
+	let result = new ModelValidationResult<T>(_key as string);
 
 	// go over each member and call validators if any
 	for (let i = 0, l = keys.length; i < l; ++i) {
@@ -235,7 +240,7 @@ async function DoValidation(target: any,
 							key: any,
 							value: any,
 							validators: Validator[],
-							injector: Injector,
+							injector: Injector | null,
 							skipUndefined: boolean,
 							result: ModelValidationResult<any>,
 							_index?: number) {
@@ -248,18 +253,20 @@ async function DoValidation(target: any,
 		}
 
 		try {
-			await validators[j](target, key as string, value, injector);
+			await validators[j](target, key as string, value, injector as Injector);
 		}
-		catch (err) {
+		catch (err: any) {
 
 			let is_validation_result = err instanceof ModelValidationResult;
 
-			if (!result.children[key]) {
-				result.children[key] = (validators[j] as any)._modelValidator
+			let child: ValidationResult<any> = result.children[key] as any;
+			if (!child) {
+				child = (validators[j] as any)._modelValidator
 					? is_validation_result
 						? err
 						: new ModelValidationResult<any>(key as string)
-					: new ValidationResult<any>(key as string)
+					: new ValidationResult<any>(key as string);
+				result.children[key] = child;
 			}
 
 
@@ -272,7 +279,7 @@ async function DoValidation(target: any,
 			// pushed into a failures[] list — those hold ValidationFailure leaves,
 			// not nested results (pushing it corrupts the tree / breaks flatten).
 			if (!is_validation_result) {
-				result.children[key].failures.push(err);
+				child.failures.push(err);
 			}
 		}
 	}

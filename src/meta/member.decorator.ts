@@ -72,8 +72,8 @@ export interface MemberOptions {
 export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
     MakePropertyDecorator(MEMBER_DECORATOR_NAME,
         (options?: MemberOptions) => options,
-        null,
-        (target: any, meta: Member, key: string) => {
+        undefined,
+        (target: any, meta: Member, key: string | symbol) => {
 
             // get the field type 
             let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
@@ -84,7 +84,7 @@ export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
                 throw new Error("You must use ArrayMember decorator for array members");
             }
 
-            meta.key = key;
+            meta.key = key as string;
             meta.type = meta.type || type;
             meta.model = annotations.find(a => a.decoratorName === MODEL_DECORATOR_NAME);
 
@@ -109,12 +109,12 @@ export const ID: IDDecorator = MakeUnique(ID_DECORATOR_NAME,
     MakePropertyDecorator(ID_DECORATOR_NAME,
         (key: string, type: Type<any>) => ({ key, type }),
         Member,
-        (target, meta: ID, key: string) => {
+        (target, meta: ID, key: string | symbol) => {
 
-            // get the field type 
+            // get the field type
             let type: Type<any> = GetMetadata('design:type', target, key) as Type<any>;
 
-            meta.key = key;
+            meta.key = key as string;
             meta.type = type;
 
         }));

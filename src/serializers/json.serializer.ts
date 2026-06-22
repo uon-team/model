@@ -18,7 +18,7 @@ class JsonSerializerImpl<T> {
 
     }
 
-    serialize(obj: T, mutationsOnly: boolean = false): object {
+    serialize(obj: T, mutationsOnly: boolean = false): object | null {
 
 		if(obj === null) {
 			return null;
@@ -99,16 +99,16 @@ class JsonSerializerImpl<T> {
             // handle array member
             if (member instanceof ArrayMember) {
 
-                let serialize_handler = GetSerializeHandler(member.type);
+                let serialize_handler = GetSerializeHandler(member.type!);
                 this._serializeStack[member.key] = CreateArrayHandler(serialize_handler);
 
-                let deserialize_handler = GetDeserializeHandler(member.type);
+                let deserialize_handler = GetDeserializeHandler(member.type!);
                 this._deserializeStack[member.key] = CreateArrayHandler(deserialize_handler);
 
             }
             else {
-                this._serializeStack[member.key] = GetSerializeHandler(member.type);
-                this._deserializeStack[member.key] = GetDeserializeHandler(member.type);
+                this._serializeStack[member.key] = GetSerializeHandler(member.type!);
+                this._deserializeStack[member.key] = GetDeserializeHandler(member.type!);
             }
 
 
@@ -133,7 +133,7 @@ export class JsonSerializer<T> {
         this._impl = GetOrCreateModelSerializerImpl(this._type);
         return this._impl;
     }
-    private _impl: JsonSerializerImpl<T>;
+    private _impl!: JsonSerializerImpl<T>;
 
     constructor(private _type: Type<T>) {
 
@@ -144,7 +144,7 @@ export class JsonSerializer<T> {
      * @param val
      * @param mutationsOnly 
      */
-    serialize(val: T, mutationsOnly: boolean = false): object {
+    serialize(val: T, mutationsOnly: boolean = false): object | null {
         return this.impl.serialize(val, mutationsOnly);
     }
 
