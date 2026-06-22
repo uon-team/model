@@ -1,4 +1,4 @@
-import { Type, MakeUnique, MakePropertyDecorator, GetMetadata, GetTypeMetadata } from "@uon/core";
+import {Type, MakePropertyDecorator, GetMetadata, GetTypeMetadata, MakeUnique} from "@uon/core";
 import { Member, MemberOptions, ID } from "./member.decorator";
 import { Validator } from "../base/validator";
 import { TypedNumber } from "../base/number.type";

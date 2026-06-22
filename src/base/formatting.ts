@@ -20,7 +20,9 @@ export function ApplyFormatting<T>(target: T) {
 
         const key = member.key as keyof T;
 
-        if (!target[key]) {
+        // only skip genuinely absent values; falsy values (0, false, '') are
+        // still valid and may need formatting
+        if (target[key] === undefined || target[key] === null) {
             continue;
         }
 

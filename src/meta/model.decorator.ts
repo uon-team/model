@@ -1,5 +1,15 @@
 
-import { Type, TypeDecorator, MakeTypeDecorator, GetPropertiesMetadata, MakeUnique, PropDecorator, PropertyNamesNotOfType, GetTypeMetadata, GetPropertiesOwnMetadata } from '@uon/core'
+import {
+	Type,
+	TypeDecorator,
+	MakeTypeDecorator,
+	GetPropertiesMetadata,
+	PropDecorator,
+	PropertyNamesNotOfType,
+	GetTypeMetadata,
+	GetPropertiesOwnMetadata,
+	MakeUnique
+} from '@uon/core'
 import { Member, ID } from './member.decorator';
 import { ArrayMember } from './array.decorator';
 import { Mutations, ClearMutations, GetMutations, MakeDirty } from '../base/mutation';
@@ -20,6 +30,11 @@ export interface ModelDecorator {
      */
     MakeClean<T>(obj: T, fields?: string[]): void;
 
+	/**
+	 * Mark a field as being modified on a model instance
+	 * @param obj
+	 * @param key
+	 */
     MakeDirty<T>(obj: T, key: keyof T): void;
 
     /**
@@ -28,11 +43,15 @@ export interface ModelDecorator {
      */
     GetMutations<T>(obj: T): Mutations<T>;
 
+	/**
+	 * Check whether any field was mutated on a model instance
+	 * @param obj
+	 */
     HasMutations<T>(obj: T): boolean;
 
 
     /**
-     * Helper for instanciating
+     * Helper for instantiating a model instance
      * @param type 
      * @param data 
      */
@@ -60,10 +79,13 @@ export interface ModelOptions {
 }
 
 
-declare var console: any;
 
 /**
- * 
+ * Class decorator that declares a schema/model: enables typed JSON & binary
+ * (de)serialization, validation, formatting and mutation tracking. Members are
+ * declared with `@Member`/`@ArrayMember`/`@NumberMember`/`@ID`. Also exposes the
+ * static helpers `New`, `Assign`, `MakeClean`, `MakeDirty`, `GetMutations` and
+ * `HasMutations`.
  */
 export const Model: ModelDecorator = MakeUnique(MODEL_DECORATOR_NAME,
     MakeTypeDecorator(MODEL_DECORATOR_NAME,
@@ -151,12 +173,8 @@ export interface Model extends ModelOptions {
     id: ID;
 }
 
-// MakeClean implementation
 Model.MakeClean = ClearMutations;
-
 Model.MakeDirty = MakeDirty;
-
-// GetMutations implementation
 Model.GetMutations = GetMutations;
 Model.HasMutations = function _HasMutation<T>(obj: T) {
 
@@ -198,14 +216,12 @@ Model.HasMutations = function _HasMutation<T>(obj: T) {
 }
 
 // New helper
-Model.New = function _Instanciate<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>) {
+Model.New = function _Instantiate<T>(type: Type<T>, data: Partial<Pick<T, PropertyNamesNotOfType<T, Function>>>) {
     return Model.Assign(new type, data);
 }
 
 // assign helper
 Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
-
-
 
     const target_model = FindModelAnnotation((target as any).constructor);
     if (!target_model) {
@@ -221,6 +237,11 @@ Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
     }
 
     for (let arg of args) {
+
+		if(!arg) {
+			continue;
+		}
+
         let model = FindModelAnnotation(arg.constructor) as Model;
         if (model) {
             const data = GetOrSet(arg, DATA_SYMBOL);
@@ -238,11 +259,18 @@ Model.Assign = function _Assign<T>(target: T, ...args: any[]) {
                         (target as any)[k] = (data[k] as any[]).slice();
                     }
                     else {
-                        if (!(target as any)[k]) {
-                            (target as any)[k] = new embedded_model_by_key[k].type();
-                        }
+						const value = data[k];
 
-                        _Assign((target as any)[k], data[k]);
+						if(value === null) {
+							(target as any)[k] = null;
+						}
+						else {
+							if (!(target as any)[k]) {
+								(target as any)[k] = new embedded_model_by_key[k].type();
+							}
+							_Assign((target as any)[k], data[k]);
+						}
+
                     }
                    
                 }

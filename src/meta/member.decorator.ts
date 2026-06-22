@@ -1,14 +1,18 @@
 
 import {
-    Type,
-    GetMetadata,
-    MakePropertyDecorator,
-    MakeUnique,
-    GetTypeMetadata
+	Type,
+	GetMetadata,
+	MakePropertyDecorator,
+	GetTypeMetadata, MakeUnique
 } from '@uon/core'
 import { Validator } from '../base/validator';
 import { Formatter } from '../base/formatter';
-import { MEMBER_DECORATOR_NAME, MODEL_DECORATOR_NAME, ID_DECORATOR_NAME } from '../base/constants';
+import {
+	MEMBER_DECORATOR_NAME,
+	MODEL_DECORATOR_NAME,
+	ID_DECORATOR_NAME,
+	ARRAY_MEMBER_DECORATOR_NAME
+} from '../base/constants';
 
 
 /**
@@ -85,9 +89,6 @@ export const Member: MemberDecorator = MakeUnique(MEMBER_DECORATOR_NAME,
             meta.model = annotations.find(a => a.decoratorName === MODEL_DECORATOR_NAME);
 
         }));
-
-
-
 
 
 export interface IDDecorator {

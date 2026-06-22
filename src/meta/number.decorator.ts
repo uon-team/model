@@ -1,9 +1,8 @@
 
 import {
-    Type,
-    GetMetadata,
-    MakePropertyDecorator,
-    MakeUnique
+	Type,
+	GetMetadata,
+	MakePropertyDecorator, MakeUnique,
 } from '@uon/core'
 import { Member } from './member.decorator';
 import { NUMBER_MEMBER_DECORATOR_NAME } from '../base/constants';
