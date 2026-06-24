@@ -9,7 +9,7 @@
         "test": "TS_NODE_PROJECT=tsconfig.test.json node --require ts-node/register --test \"src/**/*.spec.ts\""
     },
     "peerDependencies": {
-        "@uon/core": "^1.1.0"
+        "@uon/core": "^1.2.0"
     },
     "dependencies": {
         "tslib": "^2.4.1"
